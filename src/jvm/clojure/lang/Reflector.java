@@ -148,6 +148,17 @@ public static boolean isMatch(Method lhs, Method rhs) {
 		return match;
 }
 
+public static Object newInstance(Constructor ctor, Object[] args){
+    try
+        {
+        return ctor.newInstance(Reflector.boxArgs(ctor.getParameterTypes(), args));
+        }
+    catch(Exception e)
+        {
+        throw Util.sneakyThrow(e);
+        }
+}
+
 public static Object invokeConstructor(Class c, Object[] args) {
 	try
 		{
