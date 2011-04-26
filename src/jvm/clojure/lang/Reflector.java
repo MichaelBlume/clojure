@@ -443,6 +443,33 @@ static int getMatchingParams(String methodName, ArrayList<Class[]> paramlists, C
 	return matchIdx;
 }
 
+public static Constructor getMatchingConstructor(Class c, Class[] argTypes){
+    Constructor[] allctors = c.getConstructors();
+    ArrayList ctors = new ArrayList();
+    ArrayList<Class[]> params = new ArrayList();
+    ArrayList<Class> rets = new ArrayList();
+    for(int i = 0; i < allctors.length; i++)
+        {
+        Constructor ctor = allctors[i];
+        if(ctor.getParameterTypes().length == argTypes.length)
+            {
+            ctors.add(ctor);
+            params.add(ctor.getParameterTypes());
+            rets.add(c);
+            }
+        }
+    if(ctors.isEmpty())
+        throw new IllegalArgumentException("No matching ctor found for " + c);
+
+    int ctoridx = 0;
+    if(ctors.size() > 1)
+        {
+        ctoridx = getMatchingParams(c.getName(), params, argTypes, rets);
+        }
+
+    return ctoridx >= 0 ? (Constructor) ctors.get(ctoridx) : null;
+}
+
 static public List getMethods(Class c, int arity, String name, boolean getStatics){
 	Method[] allmethods = c.getMethods();
 	ArrayList methods = new ArrayList();
