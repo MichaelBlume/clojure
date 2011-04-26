@@ -493,7 +493,7 @@ static class DefExpr implements Expr{
 		return Var.class;
 	}
 
-	static class Parser implements IParser{
+    static class Parser implements IParser{
 		public Expr parse(C context, Object form) {
 			//(def x) or (def x initexpr) or (def x "docstring" initexpr)
 			String docstring = null;
@@ -925,6 +925,8 @@ static public abstract class HostExpr implements Expr, MaybePrimitiveExpr{
 			}
 	}
 
+        private static final Class[] EMPTY_TYPES = new Class[0];
+
 	static class Parser implements IParser{
 		public Expr parse(C context, Object frm) {
 			ISeq form = (ISeq) frm;
@@ -951,9 +953,9 @@ static public abstract class HostExpr implements Expr, MaybePrimitiveExpr{
 				{
 				Symbol sym = (Symbol) RT.third(form);
 				if(c != null)
-					maybeField = Reflector.getMethods(c, 0, munge(sym.name), true).size() == 0;
+					maybeField = Reflector.getMatchingStaticMethod(c, munge(sym.name), EMPTY_TYPES) == null;
 				else if(instance != null && instance.hasJavaClass() && instance.getJavaClass() != null)
-					maybeField = Reflector.getMethods(instance.getJavaClass(), 0, munge(sym.name), false).size() == 0;
+					maybeField = Reflector.getMatchingInstanceMethod(instance.getJavaClass(), munge(sym.name), EMPTY_TYPES) == null;
 				}
 
 			if(maybeField)    //field
@@ -3428,12 +3430,11 @@ static class InvokeExpr implements Expr{
                               " (The protocol method may have been defined before and removed.)");
                     }
                     String mname = munge(mmapVal.sym.toString());
- 					List methods = Reflector.getMethods(protocolOn, args.count() - 1, mname, false);
-					if(methods.size() != 1)
+                    this.onMethod = Reflector.getMatchingInstanceMethod(protocolOn, mname, argexprTypes(RT.subvec(args, 1, args.count())));
+					if(this.onMethod == null)
 						throw new IllegalArgumentException(
 								"No single method: " + mname + " of interface: " + protocolOn.getName() +
 								" found for function: " + fvar.sym + " of protocol: " + pvar.sym);
-					this.onMethod = (java.lang.reflect.Method) methods.get(0);
 					}
 				}
 			}
