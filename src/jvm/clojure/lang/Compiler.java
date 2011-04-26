@@ -2358,30 +2358,7 @@ public static class NewExpr implements Expr{
 	public NewExpr(Class c, IPersistentVector args, int line, int column) {
 		this.args = args;
 		this.c = c;
-		Constructor[] allctors = c.getConstructors();
-		ArrayList ctors = new ArrayList();
-		ArrayList<Class[]> params = new ArrayList();
-		ArrayList<Class> rets = new ArrayList();
-		for(int i = 0; i < allctors.length; i++)
-			{
-			Constructor ctor = allctors[i];
-			if(ctor.getParameterTypes().length == args.count())
-				{
-				ctors.add(ctor);
-				params.add(ctor.getParameterTypes());
-				rets.add(c);
-				}
-			}
-		if(ctors.isEmpty())
-			throw new IllegalArgumentException("No matching ctor found for " + c);
-
-		int ctoridx = 0;
-		if(ctors.size() > 1)
-			{
-			ctoridx = Reflector.getMatchingParams(c.getName(), params, argexprTypes(args), rets);
-			}
-
-		this.ctor = ctoridx >= 0 ? (Constructor) ctors.get(ctoridx) : null;
+		ctor = Reflector.getMatchingConstructor(c, argexprTypes(args));
 		if(ctor == null && RT.booleanCast(RT.WARN_ON_REFLECTION.deref()))
 			{
 			RT.errPrintWriter()
