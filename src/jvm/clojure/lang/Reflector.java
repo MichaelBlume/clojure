@@ -470,7 +470,7 @@ public static Constructor getMatchingConstructor(Class c, Class[] argTypes){
     return ctoridx >= 0 ? (Constructor) ctors.get(ctoridx) : null;
 }
 
-static public List getMethods(Class c, int arity, String name, boolean getStatics){
+static private List getMethods(Class c, int arity, String name, boolean getStatics){
 	Method[] allmethods = c.getMethods();
 	ArrayList methods = new ArrayList();
 	ArrayList bridgeMethods = new ArrayList();
@@ -556,7 +556,7 @@ public static Method getMatchingInstanceMethod(Class c, String methodName, Class
 public static Method getMatchingStaticMethod(Class c, String methodName, Class[] argTypes){
     List methods = getMethods(c, argTypes.length, methodName, true);
     if(methods.isEmpty())
-        throw new IllegalArgumentException("No matching method: " + methodName);
+        return null;
 
     int methodidx = 0;
     if(methods.size() > 1)
