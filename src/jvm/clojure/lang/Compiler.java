@@ -2373,14 +2373,7 @@ public static class NewExpr implements Expr{
 		Object[] argvals = argexprVals(args);
 		if(this.ctor != null)
 			{
-			try
-				{
-				return ctor.newInstance(Reflector.boxArgs(ctor.getParameterTypes(), argvals));
-				}
-			catch(Exception e)
-				{
-				throw Util.sneakyThrow(e);
-				}
+			return Reflector.newInstance(this.ctor, argvals);
 			}
 		return Reflector.invokeConstructor(c, argvals);
 	}
