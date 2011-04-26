@@ -1456,7 +1456,7 @@ static class InstanceMethodExpr extends MethodExpr{
 						params.add(m.getParameterTypes());
 						rets.add(m.getReturnType());
 						}
-					methodidx = getMatchingParams(methodName, params, args, rets);
+					methodidx = getMatchingParams(methodName, params, argexprTypes(args), rets);
 					}
 				java.lang.reflect.Method m =
 						(java.lang.reflect.Method) (methodidx >= 0 ? methods.get(methodidx) : null);
@@ -1624,7 +1624,7 @@ static class StaticMethodExpr extends MethodExpr{
 				params.add(m.getParameterTypes());
 				rets.add(m.getReturnType());
 				}
-			methodidx = getMatchingParams(methodName, params, args, rets);
+			methodidx = getMatchingParams(methodName, params, argexprTypes(args), rets);
 			}
 		method = (java.lang.reflect.Method) (methodidx >= 0 ? methods.get(methodidx) : null);
 		if(method == null && RT.booleanCast(RT.WARN_ON_REFLECTION.deref()))
@@ -2416,7 +2416,7 @@ static String getTypeStringForArgs(IPersistentVector args){
 	return sb.toString();
 }
 
-static int getMatchingParams(String methodName, ArrayList<Class[]> paramlists, IPersistentVector argexprs,
+static int getMatchingParams(String methodName, ArrayList<Class[]> paramlists, Class[] argTypes,
                              List<Class> rets)
 		{
 	//presumes matching lengths
@@ -2426,19 +2426,17 @@ static int getMatchingParams(String methodName, ArrayList<Class[]> paramlists, I
 	for(int i = 0; i < paramlists.size(); i++)
 		{
 		boolean match = true;
-		ISeq aseq = argexprs.seq();
 		int exact = 0;
-		for(int p = 0; match && p < argexprs.count() && aseq != null; ++p, aseq = aseq.next())
+		for(int p = 0; match && p < argTypes.length; ++p)
 			{
-			Expr arg = (Expr) aseq.first();
-			Class aclass = arg.hasJavaClass() ? arg.getJavaClass() : Object.class;
+			Class aclass = argTypes[p];
 			Class pclass = paramlists.get(i)[p];
-			if(arg.hasJavaClass() && aclass == pclass)
+			if(aclass == pclass)
 				exact++;
 			else
 				match = Reflector.paramArgTypeMatch(pclass, aclass);
 			}
-		if(exact == argexprs.count())
+		if(exact == argTypes.length)
             {
             if(!foundExact || matchIdx == -1 || rets.get(matchIdx).isAssignableFrom(rets.get(i)))
                 matchIdx = i;
@@ -2504,7 +2502,7 @@ public static class NewExpr implements Expr{
 		int ctoridx = 0;
 		if(ctors.size() > 1)
 			{
-			ctoridx = getMatchingParams(c.getName(), params, args, rets);
+			ctoridx = getMatchingParams(c.getName(), params, argexprTypes(args), rets);
 			}
 
 		this.ctor = ctoridx >= 0 ? (Constructor) ctors.get(ctoridx) : null;
@@ -2766,6 +2764,17 @@ public static class IfExpr implements Expr, MaybePrimitiveExpr{
 			                  elseexpr);
 		}
 	}
+}
+
+static Class[] argexprTypes(IPersistentVector argexprs){
+    Class[] argTypes = new Class[argexprs.count()];
+    ISeq aseq = argexprs.seq();
+    for(int i = 0; i < argexprs.count() && aseq != null; i++, aseq = aseq.next())
+    {
+        Expr arg = (Expr) aseq.first();
+        argTypes[i] = arg.hasJavaClass() ? arg.getJavaClass() : Object.class;
+    }
+    return argTypes;
 }
 
 private static Object[] argexprVals(IPersistentVector argexprs){
