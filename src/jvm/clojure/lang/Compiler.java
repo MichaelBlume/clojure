@@ -1432,46 +1432,17 @@ static class InstanceMethodExpr extends MethodExpr{
 		this.tag = tag;
 		if(target.hasJavaClass() && target.getJavaClass() != null)
 			{
-			List methods = Reflector.getMethods(target.getJavaClass(), args.count(), methodName, false);
-			if(methods.isEmpty())
+			method = Reflector.getMatchingInstanceMethod(target.getJavaClass(), methodName, argexprTypes(args));
+			if(method == null && RT.booleanCast(RT.WARN_ON_REFLECTION.deref()))
 				{
-				method = null;
-				if(RT.booleanCast(RT.WARN_ON_REFLECTION.deref()))
-					{
+				if (Reflector.getMethods(target.getJavaClass(), args.count(), methodName, false) == null)
 					RT.errPrintWriter()
 						.format("Reflection warning, %s:%d:%d - call to method %s on %s can't be resolved (no such method).\n",
 							SOURCE_PATH.deref(), line, column, methodName, target.getJavaClass().getName());
-					}
-				}
-			else
-				{
-				int methodidx = 0;
-				if(methods.size() > 1)
-					{
-					ArrayList<Class[]> params = new ArrayList();
-					ArrayList<Class> rets = new ArrayList();
-					for(int i = 0; i < methods.size(); i++)
-						{
-						java.lang.reflect.Method m = (java.lang.reflect.Method) methods.get(i);
-						params.add(m.getParameterTypes());
-						rets.add(m.getReturnType());
-						}
-					methodidx = Reflector.getMatchingParams(methodName, params, argexprTypes(args), rets);
-					}
-				java.lang.reflect.Method m =
-						(java.lang.reflect.Method) (methodidx >= 0 ? methods.get(methodidx) : null);
-				if(m != null && !Modifier.isPublic(m.getDeclaringClass().getModifiers()))
-					{
-					//public method of non-public class, try to find it in hierarchy
-					m = Reflector.getAsMethodOfPublicBase(m.getDeclaringClass(), m);
-					}
-				method = m;
-				if(method == null && RT.booleanCast(RT.WARN_ON_REFLECTION.deref()))
-					{
+				else
 					RT.errPrintWriter()
 						.format("Reflection warning, %s:%d:%d - call to method %s on %s can't be resolved (argument types: %s).\n",
 							SOURCE_PATH.deref(), line, column, methodName, target.getJavaClass().getName(), getTypeStringForArgs(args));
-					}
 				}
 			}
 		else

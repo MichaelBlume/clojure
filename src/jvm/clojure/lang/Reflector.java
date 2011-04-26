@@ -495,6 +495,36 @@ static public List getMethods(Class c, int arity, String name, boolean getStatic
 	return methods;
 }
 
+public static Method getMatchingInstanceMethod(Class c, String methodName, Class[] argTypes){
+    List methods = getMethods(c, argTypes.length, methodName, false);
+    if(methods.isEmpty())
+        return null;
+    //throw new IllegalArgumentException("No matching method found");
+    else
+        {
+        int methodidx = 0;
+        if(methods.size() > 1)
+            {
+            ArrayList<Class[]> params = new ArrayList();
+            ArrayList<Class> rets = new ArrayList();
+            for(int i = 0; i < methods.size(); i++)
+                {
+                java.lang.reflect.Method m = (java.lang.reflect.Method) methods.get(i);
+                params.add(m.getParameterTypes());
+                rets.add(m.getReturnType());
+                }
+            methodidx = getMatchingParams(methodName, params, argTypes, rets);
+            }
+        java.lang.reflect.Method m =
+                (java.lang.reflect.Method) (methodidx >= 0 ? methods.get(methodidx) : null);
+        if(m != null && !Modifier.isPublic(m.getDeclaringClass().getModifiers()))
+            {
+            //public method of non-public class, try to find it in hierarchy
+            m = Reflector.getAsMethodOfPublicBase(m.getDeclaringClass(), m);
+            }
+        return m;
+        }
+}
 
 static Object boxArg(Class paramType, Object arg){
 	if(!paramType.isPrimitive())
