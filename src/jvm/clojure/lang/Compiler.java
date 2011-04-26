@@ -1456,7 +1456,7 @@ static class InstanceMethodExpr extends MethodExpr{
 						params.add(m.getParameterTypes());
 						rets.add(m.getReturnType());
 						}
-					methodidx = getMatchingParams(methodName, params, argexprTypes(args), rets);
+					methodidx = Reflector.getMatchingParams(methodName, params, argexprTypes(args), rets);
 					}
 				java.lang.reflect.Method m =
 						(java.lang.reflect.Method) (methodidx >= 0 ? methods.get(methodidx) : null);
@@ -1624,7 +1624,7 @@ static class StaticMethodExpr extends MethodExpr{
 				params.add(m.getParameterTypes());
 				rets.add(m.getReturnType());
 				}
-			methodidx = getMatchingParams(methodName, params, argexprTypes(args), rets);
+			methodidx = Reflector.getMatchingParams(methodName, params, argexprTypes(args), rets);
 			}
 		method = (java.lang.reflect.Method) (methodidx >= 0 ? methods.get(methodidx) : null);
 		if(method == null && RT.booleanCast(RT.WARN_ON_REFLECTION.deref()))
@@ -2386,25 +2386,6 @@ static class ThrowExpr extends UntypedExpr{
 }
 
 
-static public boolean subsumes(Class[] c1, Class[] c2){
-	//presumes matching lengths
-	Boolean better = false;
-	for(int i = 0; i < c1.length; i++)
-		{
-		if(c1[i] != c2[i])// || c2[i].isPrimitive() && c1[i] == Object.class))
-			{
-			if(!c1[i].isPrimitive() && c2[i].isPrimitive()
-			   //|| Number.class.isAssignableFrom(c1[i]) && c2[i].isPrimitive()
-			   ||
-			   c2[i].isAssignableFrom(c1[i]))
-				better = true;
-			else
-				return false;
-			}
-		}
-	return better;
-}
-
 static String getTypeStringForArgs(IPersistentVector args){
 	StringBuilder sb = new StringBuilder();
 	for(int i = 0; i < args.count(); i++)
@@ -2414,60 +2395,6 @@ static String getTypeStringForArgs(IPersistentVector args){
 		sb.append(arg.hasJavaClass() ? arg.getJavaClass().getName() : "unknown");
 		}
 	return sb.toString();
-}
-
-static int getMatchingParams(String methodName, ArrayList<Class[]> paramlists, Class[] argTypes,
-                             List<Class> rets)
-		{
-	//presumes matching lengths
-	int matchIdx = -1;
-	boolean tied = false;
-    boolean foundExact = false;
-	for(int i = 0; i < paramlists.size(); i++)
-		{
-		boolean match = true;
-		int exact = 0;
-		for(int p = 0; match && p < argTypes.length; ++p)
-			{
-			Class aclass = argTypes[p];
-			Class pclass = paramlists.get(i)[p];
-			if(aclass == pclass)
-				exact++;
-			else
-				match = Reflector.paramArgTypeMatch(pclass, aclass);
-			}
-		if(exact == argTypes.length)
-            {
-            if(!foundExact || matchIdx == -1 || rets.get(matchIdx).isAssignableFrom(rets.get(i)))
-                matchIdx = i;
-            tied = false;
-            foundExact = true;
-            }
-		else if(match && !foundExact)
-			{
-			if(matchIdx == -1)
-				matchIdx = i;
-			else
-				{
-				if(subsumes(paramlists.get(i), paramlists.get(matchIdx)))
-					{
-					matchIdx = i;
-					tied = false;
-					}
-				else if(Arrays.equals(paramlists.get(matchIdx), paramlists.get(i)))
-					{
-					if(rets.get(matchIdx).isAssignableFrom(rets.get(i)))
-						matchIdx = i;
-					}
-				else if(!(subsumes(paramlists.get(matchIdx), paramlists.get(i))))
-						tied = true;
-				}
-			}
-		}
-	if(tied)
-		throw new IllegalArgumentException("More than one matching method found: " + methodName);
-
-	return matchIdx;
 }
 
 public static class NewExpr implements Expr{
@@ -2502,7 +2429,7 @@ public static class NewExpr implements Expr{
 		int ctoridx = 0;
 		if(ctors.size() > 1)
 			{
-			ctoridx = getMatchingParams(c.getName(), params, argexprTypes(args), rets);
+			ctoridx = Reflector.getMatchingParams(c.getName(), params, argexprTypes(args), rets);
 			}
 
 		this.ctor = ctoridx >= 0 ? (Constructor) ctors.get(ctoridx) : null;

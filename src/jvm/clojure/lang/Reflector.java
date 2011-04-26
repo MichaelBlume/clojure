@@ -17,6 +17,7 @@ import java.lang.reflect.Field;
 import java.lang.reflect.Method;
 import java.lang.reflect.Modifier;
 import java.util.ArrayList;
+import java.util.Arrays;
 import java.util.Iterator;
 import java.util.List;
 
@@ -67,7 +68,7 @@ static Object invokeMatchingMethod(String methodName, List methods, Object targe
 			Class[] params = m.getParameterTypes();
 			if(isCongruent(params, args))
 				{
-				if(foundm == null || Compiler.subsumes(params, foundm.getParameterTypes()))
+				if(foundm == null || subsumes(params, foundm.getParameterTypes()))
 					{
 					foundm = m;
 					boxedArgs = boxArgs(params, args);
@@ -367,6 +368,79 @@ static public Field getField(Class c, String name, boolean getStatics){
 			return allfields[i];
 		}
 	return null;
+}
+
+static public boolean subsumes(Class[] c1, Class[] c2){
+	//presumes matching lengths
+	Boolean better = false;
+	for(int i = 0; i < c1.length; i++)
+		{
+		if(c1[i] != c2[i])// || c2[i].isPrimitive() && c1[i] == Object.class))
+			{
+			if(!c1[i].isPrimitive() && c2[i].isPrimitive()
+			   //|| Number.class.isAssignableFrom(c1[i]) && c2[i].isPrimitive()
+			   ||
+			   c2[i].isAssignableFrom(c1[i]))
+				better = true;
+			else
+				return false;
+			}
+		}
+	return better;
+}
+
+static int getMatchingParams(String methodName, ArrayList<Class[]> paramlists, Class[] argTypes,
+                             List<Class> rets)
+		{
+	//presumes matching lengths
+	int matchIdx = -1;
+	boolean tied = false;
+    boolean foundExact = false;
+	for(int i = 0; i < paramlists.size(); i++)
+		{
+		boolean match = true;
+		int exact = 0;
+		for(int p = 0; match && p < argTypes.length; ++p)
+			{
+			Class aclass = argTypes[p];
+			Class pclass = paramlists.get(i)[p];
+			if(aclass == pclass)
+				exact++;
+			else
+				match = Reflector.paramArgTypeMatch(pclass, aclass);
+			}
+		if(exact == argTypes.length)
+            {
+            if(!foundExact || matchIdx == -1 || rets.get(matchIdx).isAssignableFrom(rets.get(i)))
+                matchIdx = i;
+            tied = false;
+            foundExact = true;
+            }
+		else if(match && !foundExact)
+			{
+			if(matchIdx == -1)
+				matchIdx = i;
+			else
+				{
+				if(subsumes(paramlists.get(i), paramlists.get(matchIdx)))
+					{
+					matchIdx = i;
+					tied = false;
+					}
+				else if(Arrays.equals(paramlists.get(matchIdx), paramlists.get(i)))
+					{
+					if(rets.get(matchIdx).isAssignableFrom(rets.get(i)))
+						matchIdx = i;
+					}
+				else if(!(subsumes(paramlists.get(matchIdx), paramlists.get(i))))
+						tied = true;
+				}
+			}
+		}
+	if(tied)
+		throw new IllegalArgumentException("More than one matching method found: " + methodName);
+
+	return matchIdx;
 }
 
 static public List getMethods(Class c, int arity, String name, boolean getStatics){
