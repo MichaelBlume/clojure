@@ -1580,24 +1580,7 @@ static class StaticMethodExpr extends MethodExpr{
 		this.column = column;
 		this.tag = tag;
 
-		List methods = Reflector.getMethods(c, args.count(), methodName, true);
-		if(methods.isEmpty())
-			throw new IllegalArgumentException("No matching method: " + methodName);
-
-		int methodidx = 0;
-		if(methods.size() > 1)
-			{
-			ArrayList<Class[]> params = new ArrayList();
-			ArrayList<Class> rets = new ArrayList();
-			for(int i = 0; i < methods.size(); i++)
-				{
-				java.lang.reflect.Method m = (java.lang.reflect.Method) methods.get(i);
-				params.add(m.getParameterTypes());
-				rets.add(m.getReturnType());
-				}
-			methodidx = Reflector.getMatchingParams(methodName, params, argexprTypes(args), rets);
-			}
-		method = (java.lang.reflect.Method) (methodidx >= 0 ? methods.get(methodidx) : null);
+		method = Reflector.getMatchingStaticMethod(c, methodName, argexprTypes(args));
 		if(method == null && RT.booleanCast(RT.WARN_ON_REFLECTION.deref()))
 			{
 			RT.errPrintWriter()

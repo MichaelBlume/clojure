@@ -526,6 +526,27 @@ public static Method getMatchingInstanceMethod(Class c, String methodName, Class
         }
 }
 
+public static Method getMatchingStaticMethod(Class c, String methodName, Class[] argTypes){
+    List methods = getMethods(c, argTypes.length, methodName, true);
+    if(methods.isEmpty())
+        throw new IllegalArgumentException("No matching method: " + methodName);
+
+    int methodidx = 0;
+    if(methods.size() > 1)
+        {
+        ArrayList<Class[]> params = new ArrayList();
+        ArrayList<Class> rets = new ArrayList();
+        for(int i = 0; i < methods.size(); i++)
+            {
+            java.lang.reflect.Method m = (java.lang.reflect.Method) methods.get(i);
+            params.add(m.getParameterTypes());
+            rets.add(m.getReturnType());
+            }
+        methodidx = getMatchingParams(methodName, params, argTypes, rets);
+        }
+    return (java.lang.reflect.Method) (methodidx >= 0 ? methods.get(methodidx) : null);
+}
+
 static Object boxArg(Class paramType, Object arg){
 	if(!paramType.isPrimitive())
 		return paramType.cast(arg);
