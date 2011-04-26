@@ -45,7 +45,12 @@ private static String noMethodReport(String methodName, Object target){
 	 return "No matching method found: " + methodName
 			+ (target==null?"":" for " + target.getClass());
 }
-static Object invokeMatchingMethod(String methodName, List methods, Object target, Object[] args)
+
+public static Object invokeMethod(Object target, Method method, Object[] args){
+    return invokeMatchingMethod(method.getName(), Arrays.asList(method), target, args);
+}
+
+private static Object invokeMatchingMethod(String methodName, List methods, Object target, Object[] args)
 		{
 	Method m = null;
 	Object[] boxedArgs = null;
