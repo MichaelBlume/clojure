@@ -105,7 +105,7 @@ private static Object invokeMatchingMethod(String methodName, List methods, Obje
 
 }
 
-public static Method getAsMethodOfPublicBase(Class c, Method m){
+private static Method getAsMethodOfPublicBase(Class c, Method m){
 	for(Class iface : c.getInterfaces())
 		{
 		for(Method im : iface.getMethods())
@@ -339,7 +339,7 @@ static public Field getField(Class c, String name, boolean getStatics){
 	return null;
 }
 
-static public boolean subsumes(Class[] c1, Class[] c2){
+private static boolean subsumes(Class[] c1, Class[] c2){
 	//presumes matching lengths
 	Boolean better = false;
 	for(int i = 0; i < c1.length; i++)
@@ -358,7 +358,7 @@ static public boolean subsumes(Class[] c1, Class[] c2){
 	return better;
 }
 
-static int getMatchingParams(String methodName, ArrayList<Class[]> paramlists, Class[] argTypes,
+private static int getMatchingParams(String methodName, ArrayList<Class[]> paramlists, Class[] argTypes,
                              List<Class> rets)
 		{
 	//presumes matching lengths
@@ -543,7 +543,7 @@ public static Method getMatchingStaticMethod(Class c, String methodName, Class[]
     return (java.lang.reflect.Method) (methodidx >= 0 ? methods.get(methodidx) : null);
 }
 
-static Object boxArg(Class paramType, Object arg){
+private static Object boxArg(Class paramType, Object arg){
 	if(!paramType.isPrimitive())
 		return paramType.cast(arg);
 	else if(paramType == boolean.class)
@@ -570,7 +570,7 @@ static Object boxArg(Class paramType, Object arg){
 	                                   ", given: " + arg.getClass().getName());
 }
 
-static Object[] boxArgs(Class[] params, Object[] args){
+private static Object[] boxArgs(Class[] params, Object[] args){
 	if(params.length == 0)
 		return null;
 	Object[] ret = new Object[params.length];
@@ -583,7 +583,7 @@ static Object[] boxArgs(Class[] params, Object[] args){
 	return ret;
 }
 
-static public boolean paramArgTypeMatch(Class paramType, Class argType){
+private static boolean paramArgTypeMatch(Class paramType, Class argType){
 	if(argType == null)
 		return !paramType.isPrimitive();
 	if(paramType == argType || paramType.isAssignableFrom(argType))
@@ -616,7 +616,7 @@ static public boolean paramArgTypeMatch(Class paramType, Class argType){
 	return false;
 }
 
-static boolean isCongruent(Class[] params, Object[] args){
+private static boolean isCongruent(Class[] params, Object[] args){
 	boolean ret = false;
 	if(args == null)
 		return params.length == 0;
