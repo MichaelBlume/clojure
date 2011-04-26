@@ -1461,9 +1461,7 @@ static class InstanceMethodExpr extends MethodExpr{
 			Object[] argvals = argexprVals(args);
 			if(method != null)
 				{
-				LinkedList ms = new LinkedList();
-				ms.add(method);
-				return Reflector.invokeMatchingMethod(methodName, ms, targetval, argvals);
+				return Reflector.invokeMethod(targetval, method, argvals);
 				}
 			return Reflector.invokeInstanceMethod(targetval, methodName, argvals);
 			}
@@ -1614,9 +1612,7 @@ static class StaticMethodExpr extends MethodExpr{
 			Object[] argvals = argexprVals(args);
 			if(method != null)
 				{
-				LinkedList ms = new LinkedList();
-				ms.add(method);
-				return Reflector.invokeMatchingMethod(methodName, ms, null, argvals);
+				return Reflector.invokeMethod(c, method, argvals);
 				}
 			return Reflector.invokeStaticMethod(c, methodName, argvals);
 			}
