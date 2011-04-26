@@ -1490,9 +1490,7 @@ static class InstanceMethodExpr extends MethodExpr{
 		try
 			{
 			Object targetval = target.eval();
-			Object[] argvals = new Object[args.count()];
-			for(int i = 0; i < args.count(); i++)
-				argvals[i] = ((Expr) args.nth(i)).eval();
+			Object[] argvals = argexprVals(args);
 			if(method != null)
 				{
 				LinkedList ms = new LinkedList();
@@ -1662,9 +1660,7 @@ static class StaticMethodExpr extends MethodExpr{
 	public Object eval() {
 		try
 			{
-			Object[] argvals = new Object[args.count()];
-			for(int i = 0; i < args.count(); i++)
-				argvals[i] = ((Expr) args.nth(i)).eval();
+			Object[] argvals = argexprVals(args);
 			if(method != null)
 				{
 				LinkedList ms = new LinkedList();
@@ -2521,9 +2517,7 @@ public static class NewExpr implements Expr{
 	}
 
 	public Object eval() {
-		Object[] argvals = new Object[args.count()];
-		for(int i = 0; i < args.count(); i++)
-			argvals[i] = ((Expr) args.nth(i)).eval();
+		Object[] argvals = argexprVals(args);
 		if(this.ctor != null)
 			{
 			try
@@ -2772,6 +2766,13 @@ public static class IfExpr implements Expr, MaybePrimitiveExpr{
 			                  elseexpr);
 		}
 	}
+}
+
+private static Object[] argexprVals(IPersistentVector argexprs){
+    Object[] argvals = new Object[argexprs.count()];
+    for(int i = 0; i < argexprs.count(); i++)
+        argvals[i] = ((Expr) argexprs.nth(i)).eval();
+    return argvals;
 }
 
 static final public IPersistentMap CHAR_MAP =
