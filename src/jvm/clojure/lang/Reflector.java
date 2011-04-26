@@ -207,11 +207,6 @@ public static Object invokeConstructor(Class c, Object[] args) {
 		}
 }
 
-public static Object invokeStaticMethodVariadic(String className, String methodName, Object... args) {
-	return invokeStaticMethod(className, methodName, args);
-
-}
-
 public static Object invokeStaticMethod(String className, String methodName, Object[] args) {
 	Class c = RT.classForName(className);
 	return invokeStaticMethod(c, methodName, args);
@@ -332,48 +327,6 @@ public static Object invokeNoArgInstanceMember(Object target, String name, boole
 			return getInstanceField(target, name);
 	}
 }
-
-public static Object invokeInstanceMember(Object target, String name) {
-	//check for field first
-	Class c = target.getClass();
-	Field f = getField(c, name, false);
-	if(f != null)  //field get
-		{
-		try
-			{
-			return prepRet(f.getType(), f.get(target));
-			}
-		catch(IllegalAccessException e)
-			{
-			throw Util.sneakyThrow(e);
-			}
-		}
-	return invokeInstanceMethod(target, name, RT.EMPTY_ARRAY);
-}
-
-public static Object invokeInstanceMember(String name, Object target, Object arg1) {
-	//check for field first
-	Class c = target.getClass();
-	Field f = getField(c, name, false);
-	if(f != null)  //field set
-		{
-		try
-			{
-			f.set(target, boxArg(f.getType(), arg1));
-			}
-		catch(IllegalAccessException e)
-			{
-			throw Util.sneakyThrow(e);
-			}
-		return arg1;
-		}
-	return invokeInstanceMethod(target, name, new Object[]{arg1});
-}
-
-public static Object invokeInstanceMember(String name, Object target, Object... args) {
-	return invokeInstanceMethod(target, name, args);
-}
-
 
 static public Field getField(Class c, String name, boolean getStatics){
 	Field[] allfields = c.getFields();
