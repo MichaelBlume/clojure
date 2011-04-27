@@ -14,6 +14,7 @@ package clojure.lang;
 
 import java.lang.reflect.Constructor;
 import java.lang.reflect.Field;
+import java.lang.reflect.InvocationTargetException;
 import java.lang.reflect.Method;
 import java.lang.reflect.Modifier;
 import java.util.ArrayList;
@@ -90,7 +91,18 @@ private static String noMethodReport(String methodName, Object target){
 }
 
 public static Object invokeMethod(Object target, Method method, Object[] args){
-    return invokeMatchingMethod(method.getName(), Arrays.asList(method), target, args);
+    try
+        {
+        return prepRet(method.getReturnType(), method.invoke(target, boxArgs(method.getParameterTypes(), args)));
+        }
+    catch(InvocationTargetException e)
+        {
+        throw Util.sneakyThrow(getCauseOrElse(e));
+        }
+    catch(Exception e)
+        {
+        throw Util.sneakyThrow(e);
+        }
 }
 
 private static Object invokeMatchingMethod(String methodName, List methods, Object target, Object[] args)
@@ -137,15 +149,8 @@ private static Object invokeMatchingMethod(String methodName, List methods, Obje
 			throw new IllegalArgumentException("Can't call public method of non-public class: " +
 			                                    oldm.toString());
 		}
-	try
-		{
-		return prepRet(m.getReturnType(), m.invoke(target, boxedArgs));
-		}
-	catch(Exception e)
-		{
-		throw Util.sneakyThrow(getCauseOrElse(e));
-		}
 
+	return invokeMethod(target, m, args);
 }
 
 private static Method getAsMethodOfPublicBase(Class c, Method m){
@@ -200,6 +205,10 @@ public static Object newInstance(Constructor ctor, Object[] args){
     try
         {
         return ctor.newInstance(Reflector.boxArgs(ctor.getParameterTypes(), args));
+        }
+    catch(InvocationTargetException e)
+        {
+          throw Util.sneakyThrow(getCauseOrElse(e));
         }
     catch(Exception e)
         {
