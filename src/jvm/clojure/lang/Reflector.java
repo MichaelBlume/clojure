@@ -189,28 +189,38 @@ public static Object invokeStaticMethod(Class c, String methodName, Object[] arg
 	return invokeMatchingMethod(c, methodName, c, args, Statics.T);
 }
 
+private static Object getFieldValue(Class c, String fieldName, Object target, Statics statics){
+    Field f = getField(c, fieldName, statics, Invoking.T);
+    try
+        {
+        return prepRet(f.getType(), f.get(target));
+        }
+    catch(Exception e)
+        {
+        throw Util.sneakyThrow(e);
+        }
+}
+
+private static Object setFieldValue(Class c, String fieldName, Object target, Object val, Statics statics){
+    Field f = getField(c, fieldName, statics, Invoking.T);
+    try
+        {
+        f.set(target, boxArg(f.getType(), val));
+        return val;
+        }
+    catch(Exception e)
+        {
+        throw Util.sneakyThrow(e);
+        }
+}
+
 public static Object getStaticField(String className, String fieldName) {
 	Class c = RT.classForName(className);
 	return getStaticField(c, fieldName);
 }
 
 public static Object getStaticField(Class c, String fieldName) {
-//	if(fieldName.equals("class"))
-//		return c;
-	Field f = getField(c, fieldName, true);
-	if(f != null)
-		{
-		try
-			{
-			return prepRet(f.getType(), f.get(null));
-			}
-		catch(IllegalAccessException e)
-			{
-			throw Util.sneakyThrow(e);
-			}
-		}
-	throw new IllegalArgumentException("No matching field found: " + fieldName
-		+ " for " + c);
+    return getFieldValue(c, fieldName, c, Statics.T);
 }
 
 public static Object setStaticField(String className, String fieldName, Object val) {
@@ -219,58 +229,15 @@ public static Object setStaticField(String className, String fieldName, Object v
 }
 
 public static Object setStaticField(Class c, String fieldName, Object val) {
-	Field f = getField(c, fieldName, true);
-	if(f != null)
-		{
-		try
-			{
-			f.set(null, boxArg(f.getType(), val));
-			}
-		catch(IllegalAccessException e)
-			{
-			throw Util.sneakyThrow(e);
-			}
-		return val;
-		}
-	throw new IllegalArgumentException("No matching field found: " + fieldName
-		+ " for " + c);
+	return setFieldValue(c, fieldName, c, val, Statics.T);
 }
 
 public static Object getInstanceField(Object target, String fieldName) {
-	Class c = target.getClass();
-	Field f = getField(c, fieldName, false);
-	if(f != null)
-		{
-		try
-			{
-			return prepRet(f.getType(), f.get(target));
-			}
-		catch(IllegalAccessException e)
-			{
-			throw Util.sneakyThrow(e);
-			}
-		}
-	throw new IllegalArgumentException("No matching field found: " + fieldName
-		+ " for " + target.getClass());
+    return getFieldValue(target.getClass(), fieldName, target, Statics.F);
 }
 
 public static Object setInstanceField(Object target, String fieldName, Object val) {
-	Class c = target.getClass();
-	Field f = getField(c, fieldName, false);
-	if(f != null)
-		{
-		try
-			{
-			f.set(target, boxArg(f.getType(), val));
-			}
-		catch(IllegalAccessException e)
-			{
-			throw Util.sneakyThrow(e);
-			}
-		return val;
-		}
-	throw new IllegalArgumentException("No matching field found: " + fieldName
-		+ " for " + target.getClass());
+    return setFieldValue(target.getClass(), fieldName, target, val, Statics.F);
 }
 
 private static final Class[] EMPTY_TYPES = new Class[0];
@@ -300,15 +267,22 @@ public static Object invokeNoArgInstanceMember(Object target, String name, boole
 	}
 }
 
+private static Field getField(Class c, String fieldName, Statics statics, Invoking invoking){
+    for(Field f : c.getFields())
+        {
+        if(fieldName.equals(f.getName())
+           && Modifier.isStatic(f.getModifiers()) == statics.b)
+            return f;
+        }
+
+    if (invoking.b)
+        throw new IllegalArgumentException("No "+fieldName+" field found in "+c.getName());
+
+    return null;
+}
+
 static public Field getField(Class c, String name, boolean getStatics){
-	Field[] allfields = c.getFields();
-	for(int i = 0; i < allfields.length; i++)
-		{
-		if(name.equals(allfields[i].getName())
-		   && Modifier.isStatic(allfields[i].getModifiers()) == getStatics)
-			return allfields[i];
-		}
-	return null;
+	return getField(c, name, getStatics ? Statics.T : Statics.F, Invoking.F);
 }
 
 private static boolean subsumes(Class[] c1, Class[] c2){
