@@ -58,6 +58,13 @@ private enum Invoking{
         this.b = b;
     }
 }
+private enum Statics{
+    T(true), F(false);
+    public final boolean b;
+    private Statics(boolean b){
+        this.b = b;
+    }
+}
 
 public static Object invokeInstanceMethod(Object target, String methodName, Object[] args) {
 	Class c = target.getClass();
@@ -500,8 +507,8 @@ static private List getMethods(Class c, int arity, String name, boolean getStati
 	return methods;
 }
 
-public static Method getMatchingInstanceMethod(Class c, String methodName, Class[] argTypes){
-    List methods = getMethods(c, argTypes.length, methodName, false);
+private static Method getMatchingMethod(Class c, String methodName, Class[] argTypes, Statics statics){
+    List methods = getMethods(c, argTypes.length, methodName, statics.b);
     if(methods.isEmpty())
         return null;
     //throw new IllegalArgumentException("No matching method found");
@@ -531,25 +538,12 @@ public static Method getMatchingInstanceMethod(Class c, String methodName, Class
         }
 }
 
-public static Method getMatchingStaticMethod(Class c, String methodName, Class[] argTypes){
-    List methods = getMethods(c, argTypes.length, methodName, true);
-    if(methods.isEmpty())
-        return null;
+public static Method getMatchingInstanceMethod(Class c, String methodName, Class[] argTypes){
+    return getMatchingMethod(c, methodName, argTypes, Statics.F);
+}
 
-    int methodidx = 0;
-    if(methods.size() > 1)
-        {
-        ArrayList<Class[]> params = new ArrayList();
-        ArrayList<Class> rets = new ArrayList();
-        for(int i = 0; i < methods.size(); i++)
-            {
-            java.lang.reflect.Method m = (java.lang.reflect.Method) methods.get(i);
-            params.add(m.getParameterTypes());
-            rets.add(m.getReturnType());
-            }
-        methodidx = getMatchingParams(methodName, params, argTypes, rets);
-        }
-    return (java.lang.reflect.Method) (methodidx >= 0 ? methods.get(methodidx) : null);
+public static Method getMatchingStaticMethod(Class c, String methodName, Class[] argTypes){
+    return getMatchingMethod(c, methodName, argTypes, Statics.T);
 }
 
 private static Object boxArg(Class paramType, Object arg){
