@@ -49,6 +49,24 @@ private static Class[] argTypes(Object[] args){
     return cs;
 }
 
+/*
+ * Functions to allow common code to work with both Method and Constructor instances
+ */
+
+private static Class[] getParameterTypes(Object member){
+    if (member instanceof Method)
+        return ((Method)member).getParameterTypes();
+    else
+        return ((Constructor)member).getParameterTypes();
+}
+
+private static Class getReturnType(Object member){
+    if (member instanceof Method)
+        return ((Method)member).getReturnType();
+    else
+        return ((Constructor)member).getDeclaringClass();
+}
+
 /* Enums to mitigate bugs from multiple boolean flags
  */
 
@@ -59,7 +77,7 @@ private enum Invoking{
         this.b = b;
     }
 }
-private enum Statics{
+enum Statics{
     T(true), F(false);
     public final boolean b;
     private Statics(boolean b){
@@ -317,7 +335,7 @@ private static boolean subsumes(Class[] c1, Class[] c2){
 	return better;
 }
 
-private static int getMatchingParams(String methodName, ArrayList<Class[]> paramlists, Class[] argTypes,
+private static <T extends Object> int getMatchingParams(T member, ArrayList<Class[]> paramlists, Class[] argTypes,
                              List<Class> rets)
 		{
 	//presumes matching lengths
@@ -366,38 +384,56 @@ private static int getMatchingParams(String methodName, ArrayList<Class[]> param
 			}
 		}
 	if(tied)
-		throw new IllegalArgumentException("More than one matching method found: " + methodName);
+	    {
+        if (member instanceof Method)
+            {
+            Method m = ((Method)member);
+            Class<?> c = m.getDeclaringClass();
+            throw new IllegalArgumentException("Found multiple "+m.getName()+" methods in "+c.getName()+" for argtypes: "+toString(argTypes));
+            }
+        else
+            {
+            Constructor<?> ctor = ((Constructor<?>)member);
+            Class<?> c = ctor.getDeclaringClass();
+            throw new IllegalArgumentException("Found multiple constructors in "+c.getName()+" for argtypes: "+toString(argTypes));
+            }
+	    }
 
 	return matchIdx;
 }
 
-private static Constructor getMatchingConstructor(Class c, Class[] argTypes, Invoking invoking){
-    Constructor[] allctors = c.getConstructors();
-    ArrayList ctors = new ArrayList();
+private static <T extends Object> T getMatchingMember(List<T> members, Class<?>[] argTypes, Invoking invoking){
+    ArrayList<T> matches = new ArrayList();
     ArrayList<Class[]> params = new ArrayList();
     ArrayList<Class> rets = new ArrayList();
-    for(int i = 0; i < allctors.length; i++)
+    for(T member : members)
         {
-        Constructor ctor = allctors[i];
-        if(ctor.getParameterTypes().length == argTypes.length)
+        if(getParameterTypes(member).length == argTypes.length)
             {
-            ctors.add(ctor);
-            params.add(ctor.getParameterTypes());
-            rets.add(c);
+            matches.add(member);
+            params.add(getParameterTypes(member));
+            rets.add(getReturnType(member));
             }
         }
 
-    int ctoridx = -1;
-    if (ctors.size() == 1)
+    int matchidx = -1;
+    if (matches.size() == 1)
         {
-        ctoridx = 0;
+        matchidx = 0;
         }
-    if(ctors.size() > 1)
+    if(matches.size() > 1)
         {
-        ctoridx = getMatchingParams(c.getName(), params, argTypes, rets);
+        matchidx = getMatchingParams(matches.get(0), params, argTypes, rets);
         }
 
-    Constructor ctor = ctoridx >= 0 ? (Constructor) ctors.get(ctoridx) : null;
+    T match = matchidx >= 0 ? matches.get(matchidx) : null;
+
+    return match;
+}
+
+private static Constructor getMatchingConstructor(Class c, Class[] argTypes, Invoking invoking){
+    List<Constructor> ctors = Arrays.asList(c.getConstructors());
+    Constructor ctor = getMatchingMember(ctors, argTypes, invoking);
 
     if (ctor == null && invoking.b)
         throw new IllegalArgumentException("No matching constructor found in "+c.getName() + " for argtypes: " + toString(argTypes));
@@ -408,7 +444,7 @@ public static Constructor getMatchingConstructor(Class c, Class[] argTypes){
     return getMatchingConstructor(c, argTypes, Invoking.F);
 }
 
-static private List getMethods(Class c, int arity, String name, boolean getStatics){
+static List<Method> getMethodsForName(Class c, String name, Statics statics){
 	Method[] allmethods = c.getMethods();
 	ArrayList methods = new ArrayList();
 	ArrayList bridgeMethods = new ArrayList();
@@ -416,8 +452,7 @@ static private List getMethods(Class c, int arity, String name, boolean getStati
 		{
 		Method method = allmethods[i];
 		if(name.equals(method.getName())
-		   && Modifier.isStatic(method.getModifiers()) == getStatics
-		   && method.getParameterTypes().length == arity)
+		   && Modifier.isStatic(method.getModifiers()) == statics.b)
 			{
 			try
 				{
@@ -444,14 +479,13 @@ static private List getMethods(Class c, int arity, String name, boolean getStati
 	if(methods.isEmpty())
 		methods.addAll(bridgeMethods);
 	
-	if(!getStatics && c.isInterface())
+	if(!statics.b && c.isInterface())
 		{
 		allmethods = Object.class.getMethods();
 		for(int i = 0; i < allmethods.length; i++)
 			{
 			if(name.equals(allmethods[i].getName())
-			   && Modifier.isStatic(allmethods[i].getModifiers()) == getStatics
-			   && allmethods[i].getParameterTypes().length == arity)
+			   && Modifier.isStatic(allmethods[i].getModifiers()) == statics.b)
 				{
 				methods.add(allmethods[i]);
 				}
@@ -461,33 +495,14 @@ static private List getMethods(Class c, int arity, String name, boolean getStati
 }
 
 private static Method getMatchingMethod(Class c, String methodName, Class[] argTypes, Statics statics, Invoking invoking){
-    List methods = getMethods(c, argTypes.length, methodName, statics.b);
-    if(methods.isEmpty())
-        return null;
-    //throw new IllegalArgumentException("No matching method found");
-    else
-        {
-        int methodidx = 0;
-        if(methods.size() > 1)
-            {
-            ArrayList<Class[]> params = new ArrayList();
-            ArrayList<Class> rets = new ArrayList();
-            for(int i = 0; i < methods.size(); i++)
-                {
-                java.lang.reflect.Method m = (java.lang.reflect.Method) methods.get(i);
-                params.add(m.getParameterTypes());
-                rets.add(m.getReturnType());
-                }
-            methodidx = getMatchingParams(methodName, params, argTypes, rets);
-            }
-        java.lang.reflect.Method m =
-                (java.lang.reflect.Method) (methodidx >= 0 ? methods.get(methodidx) : null);
-        if(m != null)
-            m = ensureMethodOfPublicBase(c, m);
-        if (m == null && invoking.b)
-            throw new IllegalArgumentException("No matching "+methodName+" method found in "+c.getName() + " for argtypes: " + toString(argTypes));
-        return m;
-        }
+    List<Method> methods = getMethodsForName(c, methodName, statics);
+    Method m = getMatchingMember(methods, argTypes, invoking);
+
+    if(m != null)
+        m = ensureMethodOfPublicBase(c, m);
+    if (m == null && invoking.b)
+        throw new IllegalArgumentException("No matching "+methodName+" method found in "+c.getName() + " for argtypes: " + toString(argTypes));
+    return m;
 }
 
 public static Method getMatchingInstanceMethod(Class c, String methodName, Class[] argTypes){

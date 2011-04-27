@@ -1437,7 +1437,7 @@ static class InstanceMethodExpr extends MethodExpr{
 			method = Reflector.getMatchingInstanceMethod(target.getJavaClass(), methodName, argexprTypes(args));
 			if(method == null && RT.booleanCast(RT.WARN_ON_REFLECTION.deref()))
 				{
-				if (Reflector.getMethods(target.getJavaClass(), args.count(), methodName, false) == null)
+				if (Reflector.getMethodsForName(target.getJavaClass(), methodName, Reflector.Statics.F) == null)
 					RT.errPrintWriter()
 						.format("Reflection warning, %s:%d:%d - call to method %s on %s can't be resolved (no such method).\n",
 							SOURCE_PATH.deref(), line, column, methodName, target.getJavaClass().getName());
