@@ -23,6 +23,42 @@ import java.util.List;
 
 public class Reflector{
 
+private static Class getClass(Object o){
+    return o == null ? null : o.getClass();
+}
+
+private static String getName(Class c){
+    return c == null ? "null" : c.getName();
+}
+
+private static String toString(Class[] cs){
+    StringBuffer sb = new StringBuffer(cs[0].getName());
+    for (int i = 1; i < cs.length; i++)
+        {
+        sb.append(",");
+        sb.append(getName(cs[i]));
+        }
+    return sb.toString();
+}
+
+private static Class[] argTypes(Object[] args){
+    Class[] cs = new Class[args.length];
+    for (int i = 0; i < args.length; i++)
+        cs[i] = getClass(args[i]);
+    return cs;
+}
+
+/* Enums to mitigate bugs from multiple boolean flags
+ */
+
+private enum Invoking{
+    T(true), F(false);
+    public final boolean b;
+    private Invoking(boolean b){
+        this.b = b;
+    }
+}
+
 public static Object invokeInstanceMethod(Object target, String methodName, Object[] args) {
 	Class c = target.getClass();
 	List methods = getMethods(c, args.length, methodName, false);
@@ -165,46 +201,9 @@ public static Object newInstance(Constructor ctor, Object[] args){
 }
 
 public static Object invokeConstructor(Class c, Object[] args) {
-	try
-		{
-		Constructor[] allctors = c.getConstructors();
-		ArrayList ctors = new ArrayList();
-		for(int i = 0; i < allctors.length; i++)
-			{
-			Constructor ctor = allctors[i];
-			if(ctor.getParameterTypes().length == args.length)
-				ctors.add(ctor);
-			}
-		if(ctors.isEmpty())
-			{
-			throw new IllegalArgumentException("No matching ctor found"
-				+ " for " + c);
-			}
-		else if(ctors.size() == 1)
-			{
-			Constructor ctor = (Constructor) ctors.get(0);
-			return ctor.newInstance(boxArgs(ctor.getParameterTypes(), args));
-			}
-		else //overloaded w/same arity
-			{
-			for(Iterator iterator = ctors.iterator(); iterator.hasNext();)
-				{
-				Constructor ctor = (Constructor) iterator.next();
-				Class[] params = ctor.getParameterTypes();
-				if(isCongruent(params, args))
-					{
-					Object[] boxedArgs = boxArgs(params, args);
-					return ctor.newInstance(boxedArgs);
-					}
-				}
-			throw new IllegalArgumentException("No matching ctor found"
-				+ " for " + c);
-			}
-		}
-	catch(Exception e)
-		{
-		throw Util.sneakyThrow(getCauseOrElse(e));
-		}
+    Class[] argTypes = argTypes(args);
+    Constructor ctor = getMatchingConstructor(c, argTypes, Invoking.T);
+    return newInstance(ctor, args);
 }
 
 public static Object invokeStaticMethod(String className, String methodName, Object[] args) {
@@ -412,7 +411,7 @@ private static int getMatchingParams(String methodName, ArrayList<Class[]> param
 	return matchIdx;
 }
 
-public static Constructor getMatchingConstructor(Class c, Class[] argTypes){
+private static Constructor getMatchingConstructor(Class c, Class[] argTypes, Invoking invoking){
     Constructor[] allctors = c.getConstructors();
     ArrayList ctors = new ArrayList();
     ArrayList<Class[]> params = new ArrayList();
@@ -427,16 +426,26 @@ public static Constructor getMatchingConstructor(Class c, Class[] argTypes){
             rets.add(c);
             }
         }
-    if(ctors.isEmpty())
-        throw new IllegalArgumentException("No matching ctor found for " + c);
 
-    int ctoridx = 0;
+    int ctoridx = -1;
+    if (ctors.size() == 1)
+        {
+        ctoridx = 0;
+        }
     if(ctors.size() > 1)
         {
         ctoridx = getMatchingParams(c.getName(), params, argTypes, rets);
         }
 
-    return ctoridx >= 0 ? (Constructor) ctors.get(ctoridx) : null;
+    Constructor ctor = ctoridx >= 0 ? (Constructor) ctors.get(ctoridx) : null;
+
+    if (ctor == null && invoking.b)
+        throw new IllegalArgumentException("No matching constructor found in "+c.getName() + " for argtypes: " + toString(argTypes));
+    return ctor;
+}
+
+public static Constructor getMatchingConstructor(Class c, Class[] argTypes){
+    return getMatchingConstructor(c, argTypes, Invoking.F);
 }
 
 static private List getMethods(Class c, int arity, String name, boolean getStatics){
