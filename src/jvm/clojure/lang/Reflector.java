@@ -109,28 +109,41 @@ private static Object invokeMatchingMethod(Class c, String methodName, Object ta
 	return invokeMethod(target, method, args);
 }
 
-private static Method getAsMethodOfPublicBase(Class c, Method m){
-	for(Class iface : c.getInterfaces())
-		{
-		for(Method im : iface.getMethods())
-			{
-			if(isMatch(im, m))
-				{
-				return im;
-				}
-			}
-		}
-	Class sc = c.getSuperclass();
-	if(sc == null)
-		return null;
-	for(Method scm : sc.getMethods())
-		{
-		if(isMatch(scm, m))
-			{
-			return scm;
-			}
-		}
-	return getAsMethodOfPublicBase(sc, m);
+private static Method ensureMethodOfPublicBase(Class<?> c, Method m){
+    if (Modifier.isPublic(m.getDeclaringClass().getModifiers()))
+        return m;
+    else
+        {
+        for(Class<?> iface : c.getInterfaces())
+            {
+            for(Method im : iface.getMethods())
+                {
+                if(im.getName().equals(m.getName())
+                   && Arrays.equals(m.getParameterTypes(), im.getParameterTypes()))
+                    {
+                    return im;
+                    }
+                }
+            }
+        Class<?> sc = c.getSuperclass();
+        if(sc == null)
+            return null;
+        for(Method scm : sc.getMethods())
+            {
+            if(scm.getName().equals(m.getName())
+               && Arrays.equals(m.getParameterTypes(), scm.getParameterTypes())
+               && Modifier.isPublic(scm.getDeclaringClass().getModifiers()))
+                {
+                return scm;
+                }
+            }
+        Method n = ensureMethodOfPublicBase(sc, m); // look in parent
+        if (n == null)
+            throw new IllegalArgumentException("Can't call public method of non-public class: " +
+                    m.toString());
+        else
+            return n;
+        }
 }
 
 public static boolean isMatch(Method lhs, Method rhs) {
@@ -469,11 +482,8 @@ private static Method getMatchingMethod(Class c, String methodName, Class[] argT
             }
         java.lang.reflect.Method m =
                 (java.lang.reflect.Method) (methodidx >= 0 ? methods.get(methodidx) : null);
-        if(m != null && !Modifier.isPublic(m.getDeclaringClass().getModifiers()))
-            {
-            //public method of non-public class, try to find it in hierarchy
-            m = Reflector.getAsMethodOfPublicBase(m.getDeclaringClass(), m);
-            }
+        if(m != null)
+            m = ensureMethodOfPublicBase(c, m);
         if (m == null && invoking.b)
             throw new IllegalArgumentException("No matching "+methodName+" method found in "+c.getName() + " for argtypes: " + toString(argTypes));
         return m;
