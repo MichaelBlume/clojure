@@ -68,9 +68,7 @@ private enum Statics{
 }
 
 public static Object invokeInstanceMethod(Object target, String methodName, Object[] args) {
-	Class c = target.getClass();
-	List methods = getMethods(c, args.length, methodName, false);
-	return invokeMatchingMethod(methodName, methods, target, args);
+    return invokeMatchingMethod(target.getClass(), methodName, target, args, Statics.F);
 }
 
 private static Throwable getCauseOrElse(Exception e) {
@@ -105,52 +103,10 @@ public static Object invokeMethod(Object target, Method method, Object[] args){
         }
 }
 
-private static Object invokeMatchingMethod(String methodName, List methods, Object target, Object[] args)
-		{
-	Method m = null;
-	Object[] boxedArgs = null;
-	if(methods.isEmpty())
-		{
-		throw new IllegalArgumentException(noMethodReport(methodName,target));
-		}
-	else if(methods.size() == 1)
-		{
-		m = (Method) methods.get(0);
-		boxedArgs = boxArgs(m.getParameterTypes(), args);
-		}
-	else //overloaded w/same arity
-		{
-		Method foundm = null;
-		for(Iterator i = methods.iterator(); i.hasNext();)
-			{
-			m = (Method) i.next();
-
-			Class[] params = m.getParameterTypes();
-			if(isCongruent(params, args))
-				{
-				if(foundm == null || subsumes(params, foundm.getParameterTypes()))
-					{
-					foundm = m;
-					boxedArgs = boxArgs(params, args);
-					}
-				}
-			}
-		m = foundm;
-		}
-	if(m == null)
-		throw new IllegalArgumentException(noMethodReport(methodName,target));
-
-	if(!Modifier.isPublic(m.getDeclaringClass().getModifiers()))
-		{
-		//public method of non-public class, try to find it in hierarchy
-		Method oldm = m;
-		m = getAsMethodOfPublicBase(m.getDeclaringClass(), m);
-		if(m == null)
-			throw new IllegalArgumentException("Can't call public method of non-public class: " +
-			                                    oldm.toString());
-		}
-
-	return invokeMethod(target, m, args);
+private static Object invokeMatchingMethod(Class c, String methodName, Object target, Object[] args, Statics statics){
+    Class[] argTypes = argTypes(args);
+    Method method = getMatchingMethod(c, methodName, argTypes, statics, Invoking.T);
+	return invokeMethod(target, method, args);
 }
 
 private static Method getAsMethodOfPublicBase(Class c, Method m){
@@ -230,8 +186,7 @@ public static Object invokeStaticMethod(String className, String methodName, Obj
 public static Object invokeStaticMethod(Class c, String methodName, Object[] args) {
 	if(methodName.equals("new"))
 		return invokeConstructor(c, args);
-	List methods = getMethods(c, args.length, methodName, true);
-	return invokeMatchingMethod(methodName, methods, null, args);
+	return invokeMatchingMethod(c, methodName, c, args, Statics.T);
 }
 
 public static Object getStaticField(String className, String fieldName) {
@@ -318,6 +273,8 @@ public static Object setInstanceField(Object target, String fieldName, Object va
 		+ " for " + target.getClass());
 }
 
+private static final Class[] EMPTY_TYPES = new Class[0];
+
 // not used as of Clojure 1.6, but left for runtime compatibility with
 // compiled bytecode from older versions
 public static Object invokeNoArgInstanceMember(Object target, String name) {
@@ -335,9 +292,9 @@ public static Object invokeNoArgInstanceMember(Object target, String name, boole
 			throw new IllegalArgumentException("No matching field found: " + name
 					+ " for " + target.getClass());
 	} else {
-		List meths = getMethods(c, 0, name, false);
-		if(meths.size() > 0)
-			return invokeMatchingMethod(name, meths, target, RT.EMPTY_ARRAY);
+		Method m = getMatchingInstanceMethod(target.getClass(), name, EMPTY_TYPES);
+		if(m != null)
+			return invokeMethod(target, m, EMPTY_TYPES);
 		else
 			return getInstanceField(target, name);
 	}
@@ -516,7 +473,7 @@ static private List getMethods(Class c, int arity, String name, boolean getStati
 	return methods;
 }
 
-private static Method getMatchingMethod(Class c, String methodName, Class[] argTypes, Statics statics){
+private static Method getMatchingMethod(Class c, String methodName, Class[] argTypes, Statics statics, Invoking invoking){
     List methods = getMethods(c, argTypes.length, methodName, statics.b);
     if(methods.isEmpty())
         return null;
@@ -543,16 +500,18 @@ private static Method getMatchingMethod(Class c, String methodName, Class[] argT
             //public method of non-public class, try to find it in hierarchy
             m = Reflector.getAsMethodOfPublicBase(m.getDeclaringClass(), m);
             }
+        if (m == null && invoking.b)
+            throw new IllegalArgumentException("No matching "+methodName+" method found in "+c.getName() + " for argtypes: " + toString(argTypes));
         return m;
         }
 }
 
 public static Method getMatchingInstanceMethod(Class c, String methodName, Class[] argTypes){
-    return getMatchingMethod(c, methodName, argTypes, Statics.F);
+    return getMatchingMethod(c, methodName, argTypes, Statics.F, Invoking.F);
 }
 
 public static Method getMatchingStaticMethod(Class c, String methodName, Class[] argTypes){
-    return getMatchingMethod(c, methodName, argTypes, Statics.T);
+    return getMatchingMethod(c, methodName, argTypes, Statics.T, Invoking.F);
 }
 
 private static Object boxArg(Class paramType, Object arg){
