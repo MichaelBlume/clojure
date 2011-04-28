@@ -33,7 +33,7 @@ private static String getName(Class c){
 }
 
 private static String toString(Class[] cs){
-    StringBuffer sb = new StringBuffer(cs[0].getName());
+    StringBuffer sb = new StringBuffer(getName(cs[0]));
     for (int i = 1; i < cs.length; i++)
         {
         sb.append(",");
@@ -99,11 +99,6 @@ private static RuntimeException throwCauseOrElseException(Exception e) {
 	if (e.getCause() != null)
 		throw Util.sneakyThrow(e.getCause());
 	throw Util.sneakyThrow(e);
-}
-
-private static String noMethodReport(String methodName, Object target){
-	 return "No matching method found: " + methodName
-			+ (target==null?"":" for " + target.getClass());
 }
 
 public static Object invokeMethod(Object target, Method method, Object[] args){
@@ -191,7 +186,7 @@ public static boolean isMatch(Method lhs, Method rhs) {
 public static Object newInstance(Constructor ctor, Object[] args){
     try
         {
-        return ctor.newInstance(Reflector.boxArgs(ctor.getParameterTypes(), args));
+        return ctor.newInstance(boxArgs(ctor.getParameterTypes(), args));
         }
     catch(InvocationTargetException e)
         {
@@ -353,7 +348,7 @@ private static <T extends Object> int getMatchingParams(T member, ArrayList<Clas
 			if(aclass == pclass)
 				exact++;
 			else
-				match = Reflector.paramArgTypeMatch(pclass, aclass);
+				match = paramArgTypeMatch(pclass, aclass);
 			}
 		if(exact == argTypes.length)
             {
@@ -467,13 +462,6 @@ static List<Method> getMethodsForName(Class c, String name, Statics statics){
 				{
 				}
 			}
-//			   && (!method.isBridge()
-//			       || (c == StringBuilder.class &&
-//			          c.getMethod(method.getName(), method.getParameterTypes())
-//					.equals(method))))
-//				{
-//				methods.add(allmethods[i]);
-//				}
 		}
 
 	if(methods.isEmpty())
@@ -584,24 +572,6 @@ private static boolean paramArgTypeMatch(Class paramType, Class argType){
 	else if(paramType == boolean.class)
 		return argType == Boolean.class;
 	return false;
-}
-
-private static boolean isCongruent(Class[] params, Object[] args){
-	boolean ret = false;
-	if(args == null)
-		return params.length == 0;
-	if(params.length == args.length)
-		{
-		ret = true;
-		for(int i = 0; ret && i < params.length; i++)
-			{
-			Object arg = args[i];
-			Class argType = (arg == null) ? null : arg.getClass();
-			Class paramType = params[i];
-			ret = paramArgTypeMatch(paramType, argType);
-			}
-		}
-	return ret;
 }
 
 public static Object prepRet(Class c, Object x){
