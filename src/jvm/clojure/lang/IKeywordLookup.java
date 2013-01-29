@@ -12,6 +12,6 @@
 
 package clojure.lang;
 
-public interface IKeywordLookup{
-ILookupThunk getLookupThunk(Keyword k);
+public interface IKeywordLookup {
+  ILookupThunk getLookupThunk(Keyword k);
 }

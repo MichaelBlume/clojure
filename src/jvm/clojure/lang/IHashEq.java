@@ -12,6 +12,6 @@
 
 package clojure.lang;
 
-public interface IHashEq{
-int hasheq();
+public interface IHashEq {
+  int hasheq();
 }

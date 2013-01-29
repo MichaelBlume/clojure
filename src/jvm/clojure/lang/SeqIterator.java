@@ -15,27 +15,26 @@ package clojure.lang;
 import java.util.Iterator;
 import java.util.NoSuchElementException;
 
-public class SeqIterator implements Iterator{
+public class SeqIterator implements Iterator {
 
-ISeq seq;
+  ISeq seq;
 
-public SeqIterator(ISeq seq){
-	this.seq = seq;
-}
+  public SeqIterator(ISeq seq) {
+    this.seq = seq;
+  }
 
-public boolean hasNext(){
-	return seq != null;
-}
+  public boolean hasNext() {
+    return seq != null;
+  }
 
-public Object next() throws NoSuchElementException {
-	if(seq == null)
-		throw new NoSuchElementException();
-	Object ret = RT.first(seq);
-	seq = RT.next(seq);
-	return ret;
-}
+  public Object next() throws NoSuchElementException {
+    if (seq == null) throw new NoSuchElementException();
+    Object ret = RT.first(seq);
+    seq = RT.next(seq);
+    return ret;
+  }
 
-public void remove(){
-throw new UnsupportedOperationException();
-}
+  public void remove() {
+    throw new UnsupportedOperationException();
+  }
 }

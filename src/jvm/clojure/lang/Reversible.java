@@ -12,6 +12,6 @@
 
 package clojure.lang;
 
-public interface Reversible{
-ISeq rseq() ;
+public interface Reversible {
+  ISeq rseq();
 }

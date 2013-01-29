@@ -39,64 +39,50 @@ import clojure.asm.Opcodes;
  *
  * @author Eric Bruneton
  */
-public class StaticInitMerger extends ClassAdapter{
+public class StaticInitMerger extends ClassAdapter {
 
-private String name;
+  private String name;
 
-private MethodVisitor clinit;
+  private MethodVisitor clinit;
 
-private String prefix;
+  private String prefix;
 
-private int counter;
+  private int counter;
 
-public StaticInitMerger(final String prefix, final ClassVisitor cv){
-	super(cv);
-	this.prefix = prefix;
-}
+  public StaticInitMerger(final String prefix, final ClassVisitor cv) {
+    super(cv);
+    this.prefix = prefix;
+  }
 
-public void visit(
-		final int version,
-		final int access,
-		final String name,
-		final String signature,
-		final String superName,
-		final String[] interfaces){
-	cv.visit(version, access, name, signature, superName, interfaces);
-	this.name = name;
-}
+  public void visit(final int version, final int access, final String name,
+      final String signature, final String superName, final String[] interfaces) {
+    cv.visit(version, access, name, signature, superName, interfaces);
+    this.name = name;
+  }
 
-public MethodVisitor visitMethod(
-		final int access,
-		final String name,
-		final String desc,
-		final String signature,
-		final String[] exceptions){
-	MethodVisitor mv;
-	if(name.equals("<clinit>"))
-		{
-		int a = Opcodes.ACC_PRIVATE + Opcodes.ACC_STATIC;
-		String n = prefix + counter++;
-		mv = cv.visitMethod(a, n, desc, signature, exceptions);
+  public MethodVisitor visitMethod(final int access, final String name,
+      final String desc, final String signature, final String[] exceptions) {
+    MethodVisitor mv;
+    if (name.equals("<clinit>")) {
+      int a = Opcodes.ACC_PRIVATE + Opcodes.ACC_STATIC;
+      String n = prefix + counter++;
+      mv = cv.visitMethod(a, n, desc, signature, exceptions);
 
-		if(clinit == null)
-			{
-			clinit = cv.visitMethod(a, name, desc, null, null);
-			}
-		clinit.visitMethodInsn(Opcodes.INVOKESTATIC, this.name, n, desc);
-		}
-	else
-		{
-		mv = cv.visitMethod(access, name, desc, signature, exceptions);
-		}
-	return mv;
-}
+      if (clinit == null) {
+        clinit = cv.visitMethod(a, name, desc, null, null);
+      }
+      clinit.visitMethodInsn(Opcodes.INVOKESTATIC, this.name, n, desc);
+    } else {
+      mv = cv.visitMethod(access, name, desc, signature, exceptions);
+    }
+    return mv;
+  }
 
-public void visitEnd(){
-	if(clinit != null)
-		{
-		clinit.visitInsn(Opcodes.RETURN);
-		clinit.visitMaxs(0, 0);
-		}
-	cv.visitEnd();
-}
+  public void visitEnd() {
+    if (clinit != null) {
+      clinit.visitInsn(Opcodes.RETURN);
+      clinit.visitMaxs(0, 0);
+    }
+    cv.visitEnd();
+  }
 }

@@ -12,11 +12,11 @@
 
 package clojure.lang;
 
-public interface ITransientMap extends ITransientAssociative, Counted{
-	
-ITransientMap assoc(Object key, Object val);
+public interface ITransientMap extends ITransientAssociative, Counted {
 
-ITransientMap without(Object key);
+  ITransientMap assoc(Object key, Object val);
 
-IPersistentMap persistent();
+  ITransientMap without(Object key);
+
+  IPersistentMap persistent();
 }

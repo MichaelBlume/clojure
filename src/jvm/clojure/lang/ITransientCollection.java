@@ -12,9 +12,9 @@
 
 package clojure.lang;
 
-public interface ITransientCollection{
+public interface ITransientCollection {
 
-ITransientCollection conj(Object val);
+  ITransientCollection conj(Object val);
 
-IPersistentCollection persistent();
+  IPersistentCollection persistent();
 }

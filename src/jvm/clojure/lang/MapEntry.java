@@ -12,29 +12,29 @@ package clojure.lang;
 
 import java.util.Iterator;
 
-public class MapEntry extends AMapEntry{
-final Object _key;
-final Object _val;
+public class MapEntry extends AMapEntry {
+  final Object _key;
+  final Object _val;
 
-public MapEntry(Object key, Object val){
-	this._key = key;
-	this._val = val;
-}
+  public MapEntry(Object key, Object val) {
+    this._key = key;
+    this._val = val;
+  }
 
-public Object key(){
-	return _key;
-}
+  public Object key() {
+    return _key;
+  }
 
-public Object val(){
-	return _val;
-}
+  public Object val() {
+    return _val;
+  }
 
-public Object getKey(){
-	return key();
-}
+  public Object getKey() {
+    return key();
+  }
 
-public Object getValue(){
-	return val();
-}
+  public Object getValue() {
+    return val();
+  }
 
 }

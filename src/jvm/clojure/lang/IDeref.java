@@ -12,6 +12,6 @@
 
 package clojure.lang;
 
-public interface IDeref{
-Object deref() ;
+public interface IDeref {
+  Object deref();
 }

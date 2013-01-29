@@ -13,6 +13,7 @@
 package clojure.lang;
 
 public interface Settable {
-    Object doSet(Object val) ;
-    Object doReset(Object val) ;
+  Object doSet(Object val);
+
+  Object doReset(Object val);
 }

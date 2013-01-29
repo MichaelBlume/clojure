@@ -12,7 +12,7 @@
 
 package clojure.lang;
 
-public interface ITransientAssociative extends ITransientCollection, ILookup{
+public interface ITransientAssociative extends ITransientCollection, ILookup {
 
-ITransientAssociative assoc(Object key, Object val);
+  ITransientAssociative assoc(Object key, Object val);
 }

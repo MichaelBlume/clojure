@@ -16,63 +16,62 @@ import java.math.BigInteger;
 import java.math.BigDecimal;
 import java.math.MathContext;
 
-public class Ratio extends Number implements Comparable{
-final public BigInteger numerator;
-final public BigInteger denominator;
+public class Ratio extends Number implements Comparable {
+  final public BigInteger numerator;
+  final public BigInteger denominator;
 
-public Ratio(BigInteger numerator, BigInteger denominator){
-	this.numerator = numerator;
-	this.denominator = denominator;
-}
+  public Ratio(BigInteger numerator, BigInteger denominator) {
+    this.numerator = numerator;
+    this.denominator = denominator;
+  }
 
-public boolean equals(Object arg0){
-	return arg0 != null
-	       && arg0 instanceof Ratio
-	       && ((Ratio) arg0).numerator.equals(numerator)
-	       && ((Ratio) arg0).denominator.equals(denominator);
-}
+  public boolean equals(Object arg0) {
+    return arg0 != null && arg0 instanceof Ratio
+        && ((Ratio) arg0).numerator.equals(numerator)
+        && ((Ratio) arg0).denominator.equals(denominator);
+  }
 
-public int hashCode(){
-	return numerator.hashCode() ^ denominator.hashCode();
-}
+  public int hashCode() {
+    return numerator.hashCode() ^ denominator.hashCode();
+  }
 
-public String toString(){
-	return numerator.toString() + "/" + denominator.toString();
-}
+  public String toString() {
+    return numerator.toString() + "/" + denominator.toString();
+  }
 
-public int intValue(){
-	return (int) doubleValue();
-}
+  public int intValue() {
+    return (int) doubleValue();
+  }
 
-public long longValue(){
-	return bigIntegerValue().longValue();
-}
+  public long longValue() {
+    return bigIntegerValue().longValue();
+  }
 
-public float floatValue(){
-	return (float)doubleValue();
-}
+  public float floatValue() {
+    return (float) doubleValue();
+  }
 
-public double doubleValue(){
-	return decimalValue(MathContext.DECIMAL64).doubleValue();
-}
+  public double doubleValue() {
+    return decimalValue(MathContext.DECIMAL64).doubleValue();
+  }
 
-public BigDecimal decimalValue(){
-	return decimalValue(MathContext.UNLIMITED);
-}
+  public BigDecimal decimalValue() {
+    return decimalValue(MathContext.UNLIMITED);
+  }
 
-public BigDecimal decimalValue(MathContext mc){
-	BigDecimal numerator = new BigDecimal(this.numerator);
-	BigDecimal denominator = new BigDecimal(this.denominator);
+  public BigDecimal decimalValue(MathContext mc) {
+    BigDecimal numerator = new BigDecimal(this.numerator);
+    BigDecimal denominator = new BigDecimal(this.denominator);
 
-	return numerator.divide(denominator, mc);
-}
+    return numerator.divide(denominator, mc);
+  }
 
-public BigInteger bigIntegerValue(){
-	return numerator.divide(denominator);
-}
+  public BigInteger bigIntegerValue() {
+    return numerator.divide(denominator);
+  }
 
-public int compareTo(Object o){
-	Number other = (Number)o;
-	return Numbers.compare(this, other);
-}
+  public int compareTo(Object o) {
+    Number other = (Number) o;
+    return Numbers.compare(this, other);
+  }
 }

@@ -12,31 +12,28 @@
 
 package clojure.lang;
 
-public class Delay implements IDeref, IPending{
-Object val;
-IFn fn;
+public class Delay implements IDeref, IPending {
+  Object val;
+  IFn fn;
 
-public Delay(IFn fn){
-	this.fn = fn;
-	this.val = null;
-}
+  public Delay(IFn fn) {
+    this.fn = fn;
+    this.val = null;
+  }
 
-static public Object force(Object x) {
-	return (x instanceof Delay) ?
-	       ((Delay) x).deref()
-	       : x;
-}
+  static public Object force(Object x) {
+    return (x instanceof Delay) ? ((Delay) x).deref() : x;
+  }
 
-synchronized public Object deref() {
-	if(fn != null)
-		{
-		val = fn.invoke();
-		fn = null;
-		}
-	return val;
-}
+  synchronized public Object deref() {
+    if (fn != null) {
+      val = fn.invoke();
+      fn = null;
+    }
+    return val;
+  }
 
-synchronized public boolean isRealized(){
-	return fn == null;
-}
+  synchronized public boolean isRealized() {
+    return fn == null;
+  }
 }

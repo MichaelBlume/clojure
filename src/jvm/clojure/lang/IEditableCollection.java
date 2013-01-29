@@ -12,6 +12,6 @@
 
 package clojure.lang;
 
-public interface IEditableCollection{
-ITransientCollection asTransient();
+public interface IEditableCollection {
+  ITransientCollection asTransient();
 }

@@ -12,8 +12,8 @@
 
 package clojure.lang;
 
-public interface Named{
-String getNamespace();
+public interface Named {
+  String getNamespace();
 
-String getName();
+  String getName();
 }

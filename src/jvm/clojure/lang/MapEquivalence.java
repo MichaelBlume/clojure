@@ -13,5 +13,4 @@
 package clojure.lang;
 
 //marker interface
-public interface MapEquivalence{
-}
+public interface MapEquivalence {}

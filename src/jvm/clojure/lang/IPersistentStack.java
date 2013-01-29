@@ -12,8 +12,8 @@
 
 package clojure.lang;
 
-public interface IPersistentStack extends IPersistentCollection{
-Object peek();
+public interface IPersistentStack extends IPersistentCollection {
+  Object peek();
 
-IPersistentStack pop();
+  IPersistentStack pop();
 }

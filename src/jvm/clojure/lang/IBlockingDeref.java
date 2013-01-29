@@ -12,6 +12,6 @@
 
 package clojure.lang;
 
-public interface IBlockingDeref{
-Object deref(long ms, Object timeoutValue) ;
+public interface IBlockingDeref {
+  Object deref(long ms, Object timeoutValue);
 }

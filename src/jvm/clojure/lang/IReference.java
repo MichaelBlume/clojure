@@ -13,6 +13,7 @@
 package clojure.lang;
 
 public interface IReference extends IMeta {
-    IPersistentMap alterMeta(IFn alter, ISeq args) ;
-    IPersistentMap resetMeta(IPersistentMap m);
+  IPersistentMap alterMeta(IFn alter, ISeq args);
+
+  IPersistentMap resetMeta(IPersistentMap m);
 }

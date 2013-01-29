@@ -12,8 +12,8 @@
 
 package clojure.lang;
 
-public interface ILookupThunk{
+public interface ILookupThunk {
 
-Object get(Object target);
+  Object get(Object target);
 
 }

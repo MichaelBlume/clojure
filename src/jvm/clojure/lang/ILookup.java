@@ -12,8 +12,8 @@
 
 package clojure.lang;
 
-public interface ILookup{
-Object valAt(Object key);
+public interface ILookup {
+  Object valAt(Object key);
 
-Object valAt(Object key, Object notFound);
+  Object valAt(Object key, Object notFound);
 }

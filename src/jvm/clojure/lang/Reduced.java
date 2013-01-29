@@ -10,14 +10,14 @@
 
 package clojure.lang;
 
-public class Reduced implements IDeref{
-Object val;
+public class Reduced implements IDeref {
+  Object val;
 
-public Reduced(Object val){
-	this.val = val;
-}
+  public Reduced(Object val) {
+    this.val = val;
+  }
 
-public Object deref(){
-	return val;
-}
+  public Object deref() {
+    return val;
+  }
 }

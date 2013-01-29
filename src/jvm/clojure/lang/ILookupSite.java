@@ -12,8 +12,8 @@
 
 package clojure.lang;
 
-public interface ILookupSite{
+public interface ILookupSite {
 
-ILookupThunk fault(Object target);
+  ILookupThunk fault(Object target);
 
 }

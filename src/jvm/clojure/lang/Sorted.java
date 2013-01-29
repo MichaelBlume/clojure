@@ -14,12 +14,12 @@ package clojure.lang;
 
 import java.util.Comparator;
 
-public interface Sorted{
-Comparator comparator();
+public interface Sorted {
+  Comparator comparator();
 
-Object entryKey(Object entry);
+  Object entryKey(Object entry);
 
-ISeq seq(boolean ascending);
+  ISeq seq(boolean ascending);
 
-ISeq seqFrom(Object key, boolean ascending);
+  ISeq seqFrom(Object key, boolean ascending);
 }

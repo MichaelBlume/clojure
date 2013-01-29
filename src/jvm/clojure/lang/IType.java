@@ -10,5 +10,4 @@
 
 package clojure.lang;
 
-public interface IType {
-}
+public interface IType {}

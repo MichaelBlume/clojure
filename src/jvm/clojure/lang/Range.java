@@ -12,53 +12,51 @@
 
 package clojure.lang;
 
-public class Range extends ASeq implements IReduce, Counted{
-final int end;
-final int n;
+public class Range extends ASeq implements IReduce, Counted {
+  final int end;
+  final int n;
 
-public Range(int start, int end){
-	this.end = end;
-	this.n = start;
-}
+  public Range(int start, int end) {
+    this.end = end;
+    this.n = start;
+  }
 
-public Range(IPersistentMap meta, int start, int end){
-	super(meta);
-	this.end = end;
-	this.n = start;
-}
+  public Range(IPersistentMap meta, int start, int end) {
+    super(meta);
+    this.end = end;
+    this.n = start;
+  }
 
-public Obj withMeta(IPersistentMap meta){
-	if(meta == meta())
-		return this;
-	return new Range(meta(), end, n);
-}
+  public Obj withMeta(IPersistentMap meta) {
+    if (meta == meta()) return this;
+    return new Range(meta(), end, n);
+  }
 
-public Object first(){
-	return n;
-}
+  public Object first() {
+    return n;
+  }
 
-public ISeq next(){
-	if(n < end-1)
-		return new Range(_meta, n + 1, end);
-	return null;
-}
+  public ISeq next() {
+    if (n < end - 1) return new Range(_meta, n + 1, end);
+    return null;
+  }
 
-public Object reduce(IFn f) {
-	Object ret = n;
-	for(int x = n+1;x < end;x++)
-		ret = f.invoke(ret, x);
-	return ret;
-}
+  public Object reduce(IFn f) {
+    Object ret = n;
+    for (int x = n + 1; x < end; x++)
+      ret = f.invoke(ret, x);
+    return ret;
+  }
 
-public Object reduce(IFn f, Object start) {
-	Object ret = f.invoke(start,n);
-	for(int x = n+1;x < end;x++)
-		ret = f.invoke(ret, x);
-	return ret;
-}
+  public Object reduce(IFn f, Object start) {
+    Object ret = f.invoke(start, n);
+    for (int x = n + 1; x < end; x++)
+      ret = f.invoke(ret, x);
+    return ret;
+  }
 
-public int count() {
+  public int count() {
     return end - n;
-    }
+  }
 
 }

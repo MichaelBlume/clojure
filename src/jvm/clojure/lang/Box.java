@@ -12,11 +12,11 @@
 
 package clojure.lang;
 
-public class Box{
+public class Box {
 
-public Object val;
+  public Object val;
 
-public Box(Object val){
-	this.val = val;
-}
+  public Box(Object val) {
+    this.val = val;
+  }
 }
