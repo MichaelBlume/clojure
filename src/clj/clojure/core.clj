@@ -7802,3 +7802,20 @@
  (catch Throwable t
    (.printStackTrace t)
    (throw t)))
+
+
+
+;;;;;;;;;;;;;;;;;;;;; Persistent Queue ;;;;;;;;;;;;;;;;;
+
+(defn queue
+  "Constructs a persistent queue, supporting efficient conj
+   onto the rear and pop from the front."
+  {:added "1.6"}
+  [coll]
+  (into (clojure.lang.PersistentQueue/EMPTY) coll))
+
+
+(defn queue?
+  "Returns true if arg is a instance of PersistentQueue."
+  {:added "1.6"}
+  [arg] (instance? clojure.lang.PersistentQueue arg))

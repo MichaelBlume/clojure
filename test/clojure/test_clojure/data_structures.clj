@@ -213,7 +213,7 @@
 ;; *** Collections ***
 
 (deftest test-count
-  (let [EMPTY clojure.lang.PersistentQueue/EMPTY]
+  (let [EMPTY (queue [])]
     (are [x y] (= (count x) y)
          EMPTY 0 
          (into EMPTY [:a :b]) 2
@@ -957,7 +957,7 @@
 ;; *** Queues ***
 
 (deftest test-queues
-  (let [EMPTY clojure.lang.PersistentQueue/EMPTY]
+  (let [EMPTY (queue [])]
     (are [x y] (= x y)
       EMPTY EMPTY
       (into EMPTY (range 50)) (into EMPTY (range 50))
@@ -967,7 +967,27 @@
       (range 5) (into EMPTY (range 5))
       (range 1 6) (-> EMPTY
                     (into (range 6))
-                    pop))
+                    pop)
+      (queue []) EMPTY
+      (into EMPTY (range 50)) (into EMPTY (range 50))
+      (conj EMPTY (Long. -1)) (conj EMPTY (Integer. -1))
+      (hash (conj EMPTY (Long. -1))) (hash (conj EMPTY (Integer. -1)))
+      (hash [1 2 3]) (hash (conj EMPTY 1 2 3))
+      (range 5) (into EMPTY (range 5))
+      (range 1 6) (-> EMPTY
+                      (into (range 6))
+                      pop)
+      (queue []) EMPTY
+      (queue [1]) '(1)
+      (queue [1 2]) '(1 2)
+      (queue [1 2 3]) '(1 2 3)
+      (queue (range 200)) (range 200)
+
+      (queue? (queue [])) true
+      (queue? (queue [1])) true
+      (queue? (queue (range 10))) true
+      (queue? []) false)
+
     (are [x y] (not= x y)
       (range 5) (into EMPTY (range 6))
       (range 6) (into EMPTY (range 5))
@@ -976,7 +996,15 @@
                     pop)
       (range 1 6) (-> EMPTY
                     (into (range 7))
-                    pop))))
+                    pop)))
+      (range 5) (queue (range 6))
+      (range 6) (queue (range 5))
+      (range 0 6) (-> (queue [])
+                    (into (range 6))
+                    pop)
+      (range 1 6) (-> (queue [])
+                    (into (range 7))
+                    pop))
 
 
 (deftest test-duplicates
