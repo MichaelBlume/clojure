@@ -34,10 +34,10 @@ final PersistentVector r;
 int _hash = -1;
 int _hasheq = -1;
 
-PersistentQueue(IPersistentMap meta, int cnt, ISeq f, PersistentVector r){
-	super(meta);
-	this.cnt = cnt;
-	this.f = f;
+public PersistentQueue(IPersistentMap meta, int cnt, ISeq f, PersistentVector r){
+    super(meta);
+    this.cnt = cnt;
+    this.f = f;
 	this.r = r;
 }
 
