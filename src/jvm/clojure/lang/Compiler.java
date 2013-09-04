@@ -6325,6 +6325,23 @@ public class Compiler implements Opcodes {
                  // Templates.
   }
 
+  static final int MAX_STR_LEN = 100;
+  static Object maybeBreakString(String literal) {
+    if (literal.length() <= MAX_STR_LEN) {
+      return literal;
+    }
+    ISeq acc = PersistentList.EMPTY;
+    int end = literal.length();
+    while (end > 0) {
+      System.out.println("splitting string literal");
+      int chunk = Math.max(end, MAX_STR_LEN);
+      acc = RT.cons(literal.substring(end - chunk, end), acc);
+      end -= chunk;
+    }
+    return RT.cons(Symbol.intern("clojure.core", "str"), acc);
+
+  }
+
   static void compile1(GeneratorAdapter gen, ObjExpr objx, Object form) {
     Integer line = (Integer) LINE.deref();
     Integer column = (Integer) COLUMN.deref();
@@ -6336,6 +6353,9 @@ public class Compiler implements Opcodes {
         RT.makeClassLoader()));
     try {
       form = macroexpand(form);
+      if (form instanceof String) {
+        form = maybeBreakString((String) form);
+      }
       if (form instanceof IPersistentCollection
           && Util.equals(RT.first(form), DO)) {
         for (ISeq s = RT.next(form); s != null; s = RT.next(s)) {
