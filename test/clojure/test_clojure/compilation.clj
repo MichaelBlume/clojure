@@ -302,3 +302,9 @@
     (is (fails-on-line-number? 101 clj-1561/threading))
     (is (fails-on-line-number? 112 clj-1561/keyword-invoke))
     (is (fails-on-line-number? 119 clj-1561/invoke-cast))))
+
+(deftest CLJ-1456-compiler-error-on-incorrect-number-of-parameters-to-throw
+  (is (thrown? RuntimeException (eval '(defn foo [] (throw)))))
+  (is (thrown? RuntimeException (eval '(defn foo [] (throw RuntimeException any-symbol)))))
+  (is (thrown? RuntimeException (eval '(defn foo [] (throw (RuntimeException.) any-symbol)))))
+  (is (var? (eval '(defn foo [] (throw (IllegalArgumentException.)))))))
