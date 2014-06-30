@@ -264,3 +264,9 @@
   (is (= clojure.test_clojure.compilation.examples.T
          (class (clojure.test_clojure.compilation.examples.T.))
          (class (clojure.test-clojure.compilation.examples/->T)))))
+
+(deftest CLJ-1456-compiler-error-on-incorrect-number-of-parameters-to-throw
+  (is (thrown? RuntimeException (eval '(defn foo [] (throw)))))
+  (is (thrown? RuntimeException (eval '(defn foo [] (throw RuntimeException any-symbol)))))
+  (is (thrown? RuntimeException (eval '(defn foo [] (throw (RuntimeException.) any-symbol)))))
+  (is (var? (eval '(defn foo [] (throw (IllegalArgumentException.)))))))
