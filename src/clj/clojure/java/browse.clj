@@ -16,7 +16,7 @@
 
 (defn- macosx? []
   (-> "os.name" System/getProperty .toLowerCase
-    (.startsWith "mac os x")))
+    (str/starts-with? "mac os x")))
 
 (defn- xdg-open-loc []
   ;; try/catch needed to mask exception on Windows without Cygwin
