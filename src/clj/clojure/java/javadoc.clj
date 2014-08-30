@@ -9,7 +9,8 @@
   ^{:author "Christophe Grand, Stuart Sierra",
      :doc "A repl helper to quickly open javadocs."}
   clojure.java.javadoc
-  (:use [clojure.java.browse :only (browse-url)] )
+  (:use [clojure.java.browse :only (browse-url)]
+        [clojure.string :only (starts-with?)])
   (:import
    (java.io File)))
 
@@ -63,7 +64,7 @@
       (-> file .toURI str)
       ;; If no local file, try remote URLs:
       (or (some (fn [[prefix url]]
-                  (when (.startsWith classname prefix)
+                  (when (starts-with? classname prefix)
                     (str url url-path ".html")))
             @*remote-javadocs*)
         ;; if *feeling-lucky* try a web search

@@ -39,7 +39,7 @@ Design notes for clojure.string:
    thread-safety is your responsibility."
       :author "Stuart Sierra, Stuart Halloway, David Liebke"}
   clojure.string
-  (:refer-clojure :exclude (replace reverse))
+  (:refer-clojure :exclude (replace reverse contains?))
   (:import (java.util.regex Pattern Matcher)
            clojure.lang.LazilyPersistentVector))
 
@@ -312,3 +312,21 @@ Design notes for clojure.string:
           (.append buffer replacement)
           (.append buffer ch))
         (recur (inc index) buffer)))))
+
+(defn starts-with?
+  "True if s begins with the string prefix."
+  {:added "1.7"}
+  [^String s ^String prefix]
+  (.startsWith s prefix))
+
+(defn ends-with?
+  "True if s ends with the string suffix."
+  {:added "1.7"}
+  [^String s ^String suffix]
+  (.endsWith s suffix))
+
+(defn contains?
+  "True if s contains the string substring."
+  {:added "1.7"}
+  [^String s ^CharSequence substring]
+  (.contains s substring))
