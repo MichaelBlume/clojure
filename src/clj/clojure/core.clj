@@ -2932,19 +2932,7 @@
 
 
 
-(defn zipmap
-  "Returns a map with the keys mapped to the corresponding vals."
-  {:added "1.0"
-   :static true}
-  [keys vals]
-    (loop [map {}
-           ks (seq keys)
-           vs (seq vals)]
-      (if (and ks vs)
-        (recur (assoc map (first ks) (first vs))
-               (next ks)
-               (next vs))
-        map)))
+
 
 (defn line-seq
   "Returns the lines of text from rdr as a lazy sequence of strings.
@@ -6286,6 +6274,17 @@
      ([a b c] (f (if (nil? a) x a) (if (nil? b) y b) (if (nil? c) z c)))
      ([a b c & ds] (apply f (if (nil? a) x a) (if (nil? b) y b) (if (nil? c) z c) ds)))))
 
+(defn zipmap
+  "Returns a map with the keys mapped to the corresponding vals."
+  {:added "1.0"
+   :static true}
+  [keys vals]
+  (let [keys (clojure.lang.RT/iter keys)
+        vals (clojure.lang.RT/iter vals)]
+    (loop [map (transient {})]
+      (if (and (.hasNext keys) (.hasNext vals))
+        (recur (assoc! map (.next keys) (.next vals)))
+        (persistent! map)))))
 
 ;;;;;;; case ;;;;;;;;;;;;;
 (defn- shift-mask [shift mask x]
