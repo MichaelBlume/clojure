@@ -3199,6 +3199,14 @@
   [^clojure.lang.ITransientCollection coll]
   (.persistent coll))
 
+(defn transient?
+  "Returns true if coll is an instance of clojure.lang.ITransientCollection,
+  otherwise returns false."
+  {:added "1.7"
+   :static true}
+  [coll]
+  (instance? clojure.lang.ITransientCollection coll))
+
 (defn conj!
   "Adds x to the transient collection, and return coll. The 'addition'
   may happen at different 'places' depending on the concrete type."
