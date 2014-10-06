@@ -7252,18 +7252,20 @@ static public void writeClassFile(String internalName, byte[] bytecode) throws I
 		}
 	String path = genPath + File.separator + internalName + ".class";
 	File cf = new File(path);
-	cf.createNewFile();
-	FileOutputStream cfs = new FileOutputStream(cf);
+    File tmp = File.createTempFile("compile-", ".tmp", cf.getParentFile());
+    FileOutputStream cfs = new FileOutputStream(tmp);
 	try
 		{
 		cfs.write(bytecode);
-		cfs.flush();
-		cfs.getFD().sync();
 		}
 	finally
 		{
 		cfs.close();
 		}
+    if(!tmp.renameTo(cf))
+        {
+        throw Util.runtimeException(String.format("Unable to rename temp class file %s to %s", tmp, cf));
+        }
 }
 
 public static void pushNS(){
