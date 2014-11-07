@@ -108,6 +108,8 @@ static
 	dispatchMacros['!'] = new CommentReader();
 	dispatchMacros['<'] = new UnreadableReader();
 	dispatchMacros['_'] = new DiscardReader();
+	dispatchMacros['+'] = new FeatureReader();
+	dispatchMacros['-'] = new FeatureReader();
 	}
 
 static boolean isWhitespace(int ch){
@@ -172,8 +174,6 @@ static public Object read(PushbackReader r, boolean eofIsError, Object eofValue,
 			if(Character.isDigit(ch))
 				{
 				Object n = readNumber(r, (char) ch);
-				if(RT.suppressRead())
-					return null;
 				return n;
 				}
 
@@ -196,16 +196,12 @@ static public Object read(PushbackReader r, boolean eofIsError, Object eofValue,
 					{
 					unread(r, ch2);
 					Object n = readNumber(r, (char) ch);
-					if(RT.suppressRead())
-						return null;
 					return n;
 					}
 				unread(r, ch2);
 				}
 
 			String token = readToken(r, (char) ch);
-			if(RT.suppressRead())
-				return null;
 			return interpretToken(token);
 			}
 		}
@@ -1184,6 +1180,10 @@ public static class CtorReader extends AFn{
 		if (!(name instanceof Symbol))
 			throw new RuntimeException("Reader tag must be a symbol");
 		Symbol sym = (Symbol)name;
+		if (RT.suppressRead()) {
+			read(r, true, null, true);
+			return r;
+		}
 		return sym.getName().contains(".") ? readRecord(r, sym) : readTagged(r, sym);
 	}
 
@@ -1268,6 +1268,58 @@ public static class CtorReader extends AFn{
 	}
 }
 
+public static class FeatureReader extends AFn {
+    static final Symbol AND = Symbol.intern("and");
+    static final Symbol NOT = Symbol.intern("not");
+    static final Symbol OR = Symbol.intern("or");
+
+    public static boolean hasFeature(Object expr) {
+        if (expr instanceof Symbol) {
+            IPersistentSet available = (IPersistentSet) RT.FEATURES.deref();
+            return available.contains(Keyword.intern((Symbol) expr));
+        } else if (expr instanceof IPersistentList) {
+            ISeq sequence = ((IPersistentList) expr).seq();
+            Symbol op = (Symbol) sequence.first();
+            if (op.equals(AND)) {
+                if (sequence.next() == null) return true;
+                for (Object feature: RT.seqToArray(sequence.more())) {
+                    if (!hasFeature(feature)) return false;
+                }
+                return true;
+            } else if (op.equals(NOT)) {
+                return !hasFeature(sequence.more().first());
+            } else if (op.equals(OR)) {
+                if (sequence.next() == null) return false;
+                for (Object feature: RT.seqToArray(sequence.more())) {
+                    if (hasFeature(feature)) return true;
+                }
+                return false;
+            }
+            throw Util.runtimeException("Invalid feature expression operator: " + op);
+        } else {
+            throw Util.runtimeException("Invalid feature expression: " + expr);
+        }
+    }
+
+    public Object invoke(Object reader, Object mode) {
+        PushbackReader r = (PushbackReader) reader;
+        Object test = read(r, true, null, true);
+        boolean include = (((Integer) mode).intValue() == (int)'+');
+        if (hasFeature(test) == include) {
+            return read(r, true, null, true);
+        } else {
+            try {
+                Var.pushThreadBindings(RT.map(RT.SUPPRESS_READ, RT.T));
+                read(r, true, null, true);
+            }
+            finally {
+                Var.popThreadBindings();
+            }
+            return r; // no-op, return the reader
+        }
+    }
+}
+
 /*
 public static void main(String[] args) throws Exception{
 	//RT.init();
@@ -1301,4 +1353,3 @@ public static void main(String[] args){
  */
 
 }
-

@@ -621,3 +621,55 @@
   [^{:tag cgen/dup-readable} o]
   (when-not (= o %)
     (throw (ex-info "Value cannot roundtrip, see ex-data" {:printed o :read %}))))
+
+(deftest feature-expressions
+  (testing "#+"
+    (testing "with symbol"
+      (is (= ["x"] [#+clj "x"]))
+      (is (= [] [#+cljs "x"])))
+    (testing "with and"
+      (is (= ["x"] [#+(and) "x"]))
+      (is (= ["x"] [#+(and clj) "x"]))
+      (is (= ["x"] [#+(and clj clj) "x"]))
+      (is (= [] [#+(and clj cljs) "x"])))
+    (testing "with or"
+      (is (= [] [#+(or) "x"]))
+      (is (= ["x"] [#+(or clj) "x"]))
+      (is (= ["x"] [#+(or clj cljs) "x"]))
+      (is (= [] [#+(or cljs) "x"])))
+    (testing "with not"
+      (is (= ["x"] [#+(not cljs) "x"])))
+    (testing "with unreadable forms"
+      (is (= [] [#+cljs #js {:foo "bar"}]))
+      (is (= [] [#+cljs #js [1 2 3]]))
+      (is (= ["x"] [#+cljs [:foo #bar 123 :baz] #+clj "x"])))
+    (testing "with nested expressions"
+      (is (= [] [#+(not (and clj (or cljs (not cljs)))) "x"]))
+      (is (= ["x"] [#+(and clj (or cljs (not cljs))) "x"]))
+      (is (= ["x"] [#+(or cljs (or #+clj clj)) "x"]))))
+  (testing "#-"
+    (testing "with symbol"
+      (is (= [] [#-clj "x"]))
+      (is (= ["x"] [#-cljs "x"])))
+    (testing "with not"
+      (is (= ["x"] [#-(not clj) "x"])))
+    (testing "with and"
+      (is (= [] [#-(and) "x"]))
+      (is (= [] [#-(and clj clj) "x"]))
+      (is (= ["x"] [#-(and clj cljs) "x"])))
+    (testing "with or"
+      (is (= ["x"] [#-(or) "x"]))
+      (is (= [] [#-(or clj) "x"]))
+      (is (= [] [#-(or clj cljs) "x"]))
+      (is (= ["x"] [#-(or cljs) "x"])))
+    (testing "with nested expressions"
+      (is (= ["x"] [#-(not (and clj (or cljs (not cljs)))) "x"]))
+      (is (= [] [#-(and clj (or cljs (not cljs))) "x"]))
+      (is (= ["x"] [#-(or cljs (or #-clj clj)) "x"]))))
+  (testing "binding around read"
+    (is (= [:x] (binding [*features* #{:a :b}] (read-string "[#+(and a b) :x]")))))
+  (testing "bad feature expressions"
+    (is (thrown-with-msg? RuntimeException #"Invalid feature expression operator: xor"
+                          (read-string "[#+(xor clj cljs) 5]")))
+    (is (thrown-with-msg? RuntimeException #"Invalid feature expression: 5"
+                          (read-string "[#+5 5]")))))
