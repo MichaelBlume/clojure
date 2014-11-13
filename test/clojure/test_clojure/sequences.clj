@@ -229,6 +229,15 @@
       (range 1 11) (sequence (map inc) (range 10))))
 
 
+(deftest compare-lists
+  (are [x y res] (= res (.compareTo x y))
+       '(1 2 3) '(1 2 3) 0
+       '(1 2 3) '(1 2) 1
+       '(1 2 3) '(1 2 3 4) -1
+       '(1 2 3) '(-1 2 3) 1
+       '(1 2 3) '(2 2 3) -1))
+
+
 (deftest test-lazy-seq
   (are [x] (seq? x)
       (lazy-seq nil)

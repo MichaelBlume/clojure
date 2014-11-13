@@ -769,13 +769,12 @@
       "" "abc"
       'sym
       :kw
-      ()  ; '(1 2)
+      ()   '(1 2)
       [] [1 2]
       {}  ; {:a 1 :b 2}
       #{} ; #{1 2}
   )
   ; cannot be cast to java.lang.Comparable
-  (is (thrown? ClassCastException (sorted-set '(1 2) '(1 2))))
   (is (thrown? ClassCastException (sorted-set {:a 1 :b 2} {:a 1 :b 2})))
   (is (thrown? ClassCastException (sorted-set #{1 2} #{1 2})))
 
@@ -820,7 +819,7 @@
       "" "abc"
       'sym
       :kw
-      ()  ; '(1 2)
+      ()   '(1 2)
       [] [1 2]
       {}  ; {:a 1 :b 2}
       #{} ; #{1 2}
@@ -828,7 +827,6 @@
   ; cannot be cast to java.lang.Comparable
   ; NB: not a ClassCastException, but a RuntimeException is thrown,
   ; requires discussion on whether this should be symmetric with test-sorted-set
-  (is (thrown? Exception (sorted-set-by compare '(1 2) '(1 2))))
   (is (thrown? Exception (sorted-set-by compare {:a 1 :b 2} {:a 1 :b 2})))
   (is (thrown? Exception (sorted-set-by compare #{1 2} #{1 2})))
 

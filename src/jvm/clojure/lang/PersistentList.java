@@ -13,7 +13,7 @@ package clojure.lang;
 import java.io.Serializable;
 import java.util.*;
 
-public class PersistentList extends ASeq implements IPersistentList, IReduce, List, Counted {
+public class PersistentList extends ASeq implements IPersistentList, IReduce, List, Counted, Comparable {
 
 private final Object _first;
 private final IPersistentList _rest;
@@ -317,5 +317,24 @@ public Object reduce(IFn f, Object start) {
 
 
 }
+
+
+    public int compareTo(Object o){
+        IPersistentList v = (IPersistentList) o;
+        if(count() < v.count())
+            return -1;
+        else if(count() > v.count())
+            return 1;
+
+        ISeq sThis = seq();
+        ISeq sThat = v.seq();
+        for(; sThis != null & sThat != null; sThis = sThis.next(), sThat = sThat.next())
+            {
+                int c = Util.compare(sThis.first(), sThat.first());
+                if(c != 0)
+                    return c;
+            }
+        return 0;
+    }
 
 }
