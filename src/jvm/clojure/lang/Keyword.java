@@ -16,6 +16,7 @@ import java.io.ObjectStreamException;
 import java.io.Serializable;
 import java.lang.ref.Reference;
 import java.lang.ref.WeakReference;
+import java.util.concurrent.ArrayBlockingQueue;
 import java.util.concurrent.ConcurrentHashMap;
 import java.lang.ref.ReferenceQueue;
 import java.lang.ref.SoftReference;
@@ -27,14 +28,42 @@ private static ConcurrentHashMap<Symbol, Reference<Keyword>> table = new Concurr
 static final ReferenceQueue rq = new ReferenceQueue();
 public final Symbol sym;
 final int hasheq;
+	private static ArrayBlockingQueue<Object> bucket = new ArrayBlockingQueue<Object>(200);
 transient String _str;
+	private static Thread t = new Thread() {
+		public void run() {
+			while(true) {
+				try {
+
+
+					bucket.take();
+				} catch (Exception e) {
+
+				}
+				if (rq.poll() == null) {
+					bucket.clear();
+				} else {
+
+
+				Util.clearCache(rq, table);
+			}}
+		}
+	};
+
+	static {t.setDaemon(true);t.start();}
+	static Object pebble = new Object();
 
 public static Keyword intern(Symbol sym){
 	Keyword k = null;
 	Reference<Keyword> existingRef = table.get(sym);
 	if(existingRef == null)
-		{
-		Util.clearCache(rq, table);
+	{
+		try {
+			bucket.put(pebble);
+		} catch (InterruptedException e) {
+			
+		}
+
 		if(sym.meta() != null)
 			sym = (Symbol) sym.withMeta(null);
 		k = new Keyword(sym);
