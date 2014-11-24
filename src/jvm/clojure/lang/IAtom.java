@@ -23,5 +23,7 @@ Object swap(IFn f, Object x, Object y, ISeq args);
 
 boolean compareAndSet(Object oldv, Object newv);
 
+Object getAndSet(Object newv);
+
 Object reset(Object newval);
 }
