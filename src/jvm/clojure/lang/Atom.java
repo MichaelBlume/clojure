@@ -94,6 +94,14 @@ public boolean compareAndSet(Object oldv, Object newv){
 	return ret;
 }
 
+
+public Object getAndSet(Object newv){
+    validate(newv);
+    Object ret = state.getAndSet(newv);
+    notifyWatches(ret, newv);
+    return ret;
+}
+
 public Object reset(Object newval){
 	Object oldval = state.get();
 	validate(newval);

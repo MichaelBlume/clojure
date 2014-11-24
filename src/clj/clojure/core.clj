@@ -2244,6 +2244,12 @@
    :static true}
   [^clojure.lang.IAtom atom oldval newval] (.compareAndSet atom oldval newval))
 
+(defn get-and-set!
+  "Atomically sets the value of atom to newval and returns oldval from atom."
+  {:added "1.7"
+   :static true}
+  [^clojure.lang.IAtom atom newval] (.getAndSet atom newval))
+
 (defn reset!
   "Sets the value of atom to newval without regard for the
   current value. Returns newval."
