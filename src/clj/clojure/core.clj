@@ -1533,11 +1533,7 @@
   {:added "1.0"}
   [x & body]
   `(let [lockee# ~x]
-     (try
-      (monitor-enter lockee#)
-      ~@body
-      (finally
-       (monitor-exit lockee#)))))
+     (. clojure.lang.Synchronized lock lockee# (fn [] ~@body))))
 
 (defmacro ..
   "form => fieldName-symbol or (instanceMethodName-symbol args*)
