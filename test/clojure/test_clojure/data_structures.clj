@@ -1171,22 +1171,26 @@
     (is (= "foo" (.reduce ^clojure.lang.IReduce (seq (long-array [1 2 3 4 5])) f)))))
 
 (defn seq-iter-match
-  [seqable iterable]
-  (let [i (.iterator iterable)]
-    (loop [s (seq seqable)
-           n 0]
-      (if (seq s)
-        (do
-          (when-not (.hasNext i)
-            (throw (ex-info "Iterator exhausted before seq"
-                            {:pos n :seqable seqable :iterable iterable})))
-          (when-not (= (.next i) (first s))
-            (throw (ex-info "Iterator and seq did not match"
-                            {:pos n :seqable seqable :iterable iterable})))
-          (recur (rest s) (inc n)))
-        (when (.hasNext i)
+  [^clojure.lang.Seqable seqable ^java.lang.Iterable iterable]
+  (if (nil? iterable)
+    (when (not (nil? (seq seqable)))
+      (throw (ex-info "Null iterable but seq has elements"
+                      {:pos 0 :seqable seqable :iterable iterable})))
+    (let [i (.iterator iterable)]
+       (loop [s (seq seqable)
+              n 0]
+         (if (seq s)
+            (do
+              (when-not (.hasNext i)
+                (throw (ex-info "Iterator exhausted before seq"
+                                {:pos n :seqable seqable :iterable iterable})))
+              (when-not (= (.next i) (first s))
+                (throw (ex-info "Iterator and seq did not match"
+                                {:pos n :seqable seqable :iterable iterable})))
+              (recur (rest s) (inc n)))
+            (when (.hasNext i)
               (throw (ex-info "Seq exhausted before iterator"
-                              {:pos n :seqable seqable :iterable iterable})))))))
+                              {:pos n :seqable seqable :iterable iterable}))))))))
 
 (deftest test-seq-iter-match
   (doseq [am [{} {nil 1} {nil 1 2 3} {1 2 3 4}]]
@@ -1234,3 +1238,13 @@
          identity
          [^{:tag clojure.test-clojure.data-structures/gen-record} r]
          (seq-iter-match r r))
+
+(defspec seq-and-iter-match-for-keys
+         identity
+         [^{:tag clojure.test-clojure.data-structures/gen-map} m]
+         (seq-iter-match (keys m) (keys m)))
+
+(defspec seq-and-iter-match-for-vals
+         identity
+         [^{:tag clojure.test-clojure.data-structures/gen-map} m]
+         (seq-iter-match (vals m) (vals m)))
