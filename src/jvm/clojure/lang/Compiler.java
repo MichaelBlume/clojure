@@ -3144,7 +3144,7 @@ public static class VectorExpr implements Expr{
 	}
 
 	public Object eval() {
-		IPersistentVector ret = PersistentVector.EMPTY;
+		IPersistentVector ret = PersistentUnrolledVector.EMPTY;
 		for(int i = 0; i < args.count(); i++)
 			ret = (IPersistentVector) ret.cons(((Expr) args.nth(i)).eval());
 		return ret;
@@ -3168,7 +3168,7 @@ public static class VectorExpr implements Expr{
 	static public Expr parse(C context, IPersistentVector form) {
 		boolean constant = true;
 
-		IPersistentVector args = PersistentVector.EMPTY;
+		IPersistentVector args = PersistentUnrolledVector.EMPTY;
 		for(int i = 0; i < form.count(); i++)
 			{
 			Expr v = analyze(context == C.EVAL ? context : C.EXPRESSION, form.nth(i));

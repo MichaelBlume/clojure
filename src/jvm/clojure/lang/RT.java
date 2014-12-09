@@ -1521,7 +1521,14 @@ static public IPersistentSet set(Object... init){
 }
 
 static public IPersistentVector vector(Object... init){
-	return LazilyPersistentVector.createOwning(init);
+	switch (init.length) {
+		case 0: return PersistentUnrolledVector.EMPTY;
+		case 1: return PersistentUnrolledVector.create(init[0]);
+		case 2: return PersistentUnrolledVector.create(init[0], init[1]);
+		case 3: return PersistentUnrolledVector.create(init[0], init[1], init[2]);
+		case 4: return PersistentUnrolledVector.create(init[0], init[1], init[2], init[3]);
+		default: return LazilyPersistentVector.createOwning(init);
+	}
 }
 
 static public IPersistentVector subvec(IPersistentVector v, int start, int end){
