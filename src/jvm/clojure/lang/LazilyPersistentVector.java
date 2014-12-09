@@ -16,9 +16,16 @@ public class LazilyPersistentVector{
 
 
 static public IPersistentVector createOwning(Object... items){
-	if(items.length == 0)
-		return PersistentVector.EMPTY;
-	else if(items.length <= 32)
+	switch (items.length) {
+		case 0: return PersistentUnrolledVector.EMPTY;
+		case 1: return PersistentUnrolledVector.create(items[0]);
+		case 2: return PersistentUnrolledVector.create(items[0], items[1]);
+		case 3: return PersistentUnrolledVector.create(items[0], items[1], items[2]);
+		case 4: return PersistentUnrolledVector.create(items[0], items[1], items[2], items[3]);
+		case 5: return PersistentUnrolledVector.create(items[0], items[1], items[2], items[3], items[4]);
+		case 6: return PersistentUnrolledVector.create(items[0], items[1], items[2], items[3], items[4], items[5]);
+	}
+	if(items.length <= 32)
 		return new PersistentVector(items.length, 5, PersistentVector.EMPTY_NODE,items);
 	return PersistentVector.create(items);
 }

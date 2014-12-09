@@ -752,7 +752,7 @@ static Object getFrom(Object coll, Object key, Object notFound){
 
 static public Associative assoc(Object coll, Object key, Object val){
 	if(coll == null)
-		return new PersistentArrayMap(new Object[]{key, val});
+		return PersistentUnrolledMap.create(key, val);
 	return ((Associative) coll).assoc(key, val);
 }
 
@@ -1510,18 +1510,42 @@ static public double uncheckedDoubleCast(double x){
 
 static public IPersistentMap map(Object... init){
 	if(init == null)
-		return PersistentArrayMap.EMPTY;
-	else if(init.length <= PersistentArrayMap.HASHTABLE_THRESHOLD)
-		return PersistentArrayMap.createWithCheck(init);
+		return PersistentUnrolledMap.EMPTY;
+	else if(init.length <= PersistentArrayMap.HASHTABLE_THRESHOLD) {
+		PersistentArrayMap.checkKV(init);
+		return mapUniqueKeys(init);
+	}
 	return PersistentHashMap.createWithCheck(init);
 }
 
 static public IPersistentMap mapUniqueKeys(Object... init){
 	if(init == null)
-		return PersistentArrayMap.EMPTY;
-	else if(init.length <= PersistentArrayMap.HASHTABLE_THRESHOLD)
-		return new PersistentArrayMap(init);
-	return PersistentHashMap.create(init);
+		return PersistentUnrolledMap.EMPTY;
+	switch (init.length) {
+		case 0: return PersistentUnrolledMap.EMPTY;
+		case 2: return PersistentUnrolledMap.create(init[0], init[1]);
+		case 4: return PersistentUnrolledMap.create(init[0], init[1],
+		                                            init[2], init[3]);
+		case 6: return PersistentUnrolledMap.create(init[0], init[1],
+		                                            init[2], init[3],
+		                                            init[4], init[5]);
+		case 8: return PersistentUnrolledMap.create(init[0], init[1],
+		                                            init[2], init[3],
+		                                            init[4], init[5],
+		                                            init[6], init[7]);
+		case 10: return PersistentUnrolledMap.create(init[0], init[1],
+		                                             init[2], init[3],
+		                                             init[4], init[5],
+		                                             init[6], init[7],
+		                                             init[8], init[9]);
+		case 12: return PersistentUnrolledMap.create(init[0], init[1],
+		                                             init[2], init[3],
+		                                             init[4], init[5],
+		                                             init[6], init[7],
+		                                             init[8], init[9],
+		                                             init[10], init[11]);
+		default: return PersistentHashMap.create(init);
+	}
 }
 
 static public IPersistentSet set(Object... init){
@@ -1536,7 +1560,7 @@ static public IPersistentVector subvec(IPersistentVector v, int start, int end){
 	if(end < start || start < 0 || end > v.count())
 		throw new IndexOutOfBoundsException();
 	if(start == end)
-		return PersistentVector.EMPTY;
+		return PersistentUnrolledVector.EMPTY;
 	return new APersistentVector.SubVector(null, v, start, end);
 }
 

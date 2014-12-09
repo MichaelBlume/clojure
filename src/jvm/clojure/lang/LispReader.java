@@ -645,7 +645,7 @@ public static class FnReader extends AFn{
 			unread(r, '(');
 			Object form = read(r, true, null, true);
 
-			PersistentVector args = PersistentVector.EMPTY;
+			IPersistentVector args = PersistentUnrolledVector.EMPTY;
 			PersistentTreeMap argsyms = (PersistentTreeMap) ARG_ENV.deref();
 			ISeq rargs = argsyms.rseq();
 			if(rargs != null)
@@ -764,7 +764,7 @@ public static class SyntaxQuoteReader extends AFn{
 		try
 			{
 			Var.pushThreadBindings(
-					RT.map(GENSYM_ENV, PersistentHashMap.EMPTY));
+					RT.map(GENSYM_ENV, PersistentUnrolledMap.EMPTY));
 
 			Object form = read(r, true, null, true);
 			return syntaxQuote(form);
@@ -872,7 +872,7 @@ public static class SyntaxQuoteReader extends AFn{
 	}
 
 	private static ISeq sqExpandList(ISeq seq) {
-		PersistentVector ret = PersistentVector.EMPTY;
+		IPersistentVector ret = PersistentUnrolledVector.EMPTY;
 		for(; seq != null; seq = seq.next())
 			{
 			Object item = seq.first();
@@ -887,7 +887,7 @@ public static class SyntaxQuoteReader extends AFn{
 	}
 
 	private static IPersistentVector flattenMap(Object form){
-		IPersistentVector keyvals = PersistentVector.EMPTY;
+		IPersistentVector keyvals = PersistentUnrolledVector.EMPTY;
 		for(ISeq s = RT.seq(form); s != null; s = s.next())
 			{
 			IMapEntry e = (IMapEntry) s.first();
@@ -1082,7 +1082,17 @@ public static class EvalReader extends AFn{
 public static class VectorReader extends AFn{
 	public Object invoke(Object reader, Object leftparen) {
 		PushbackReader r = (PushbackReader) reader;
-		return LazilyPersistentVector.create(readDelimitedList(']', r, true));
+		Object[] init = readDelimitedList(']', r, true).toArray();
+		switch (init.length) {
+			case 0: return PersistentUnrolledVector.EMPTY;
+			case 1: return PersistentUnrolledVector.create(init[0]);
+			case 2: return PersistentUnrolledVector.create(init[0], init[1]);
+			case 3: return PersistentUnrolledVector.create(init[0], init[1], init[2]);
+			case 4: return PersistentUnrolledVector.create(init[0], init[1], init[2], init[3]);
+			case 5: return PersistentUnrolledVector.create(init[0], init[1], init[2], init[3], init[4]);
+			case 6: return PersistentUnrolledVector.create(init[0], init[1], init[2], init[3], init[4], init[5]);
+			default: return LazilyPersistentVector.create(init);
+		}
 	}
 
 }
@@ -1093,6 +1103,7 @@ public static class MapReader extends AFn{
 		Object[] a = readDelimitedList('}', r, true).toArray();
 		if((a.length & 1) == 1)
 			throw Util.runtimeException("Map literal must contain an even number of forms");
+		if (a.length == 0) return PersistentUnrolledMap.EMPTY;
 		return RT.map(a);
 	}
 
