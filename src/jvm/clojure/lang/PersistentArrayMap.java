@@ -61,15 +61,20 @@ IPersistentMap createHT(Object[] init){
 	return PersistentHashMap.create(meta(), init);
 }
 
-static public PersistentArrayMap createWithCheck(Object[] init){
-	for(int i=0;i< init.length;i += 2)
+	static public void checkKV(Object[] init) {
+		for(int i=0;i< init.length;i += 2)
 		{
-		for(int j=i+2;j<init.length;j += 2)
+			for(int j=i+2;j<init.length;j += 2)
 			{
-			if(equalKey(init[i],init[j]))
-				throw new IllegalArgumentException("Duplicate key: " + init[i]);
+				if(equalKey(init[i],init[j]))
+					throw new IllegalArgumentException("Duplicate key: " + init[i]);
 			}
 		}
+	}
+
+
+static public IPersistentMap createWithCheck(Object[] init){
+	checkKV(init);
 	return new PersistentArrayMap(init);
 }
 

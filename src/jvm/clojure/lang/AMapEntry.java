@@ -26,7 +26,7 @@ public Object nth(int i){
 }
 
 private IPersistentVector asVector(){
-	return LazilyPersistentVector.createOwning(key(), val());
+	return PersistentUnrolledVector.create(key(), val());
 }
 
 public IPersistentVector assocN(int i, Object val){
@@ -50,7 +50,7 @@ public IPersistentCollection empty(){
 }
 
 public IPersistentStack pop(){
-	return LazilyPersistentVector.createOwning(key());
+	return PersistentUnrolledVector.create(key());
 }
 
 public Object setValue(Object value){
