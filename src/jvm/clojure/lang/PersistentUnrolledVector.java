@@ -65,6 +65,10 @@ public class PersistentUnrolledVector {
 	    return meta;
 	}
 
+	public static IPersistentVector create(IPersistentVector v) {
+	    return v;
+	}
+
 	public IObj withMeta(IPersistentMap meta) {
 	    return new Card0(meta);
 	}
@@ -187,6 +191,10 @@ public class PersistentUnrolledVector {
 
 	public IPersistentMap meta() {
 	    return meta;
+	}
+
+	public static IPersistentVector create(IPersistentVector v) {
+	    return v;
 	}
 
 	public IObj withMeta(IPersistentMap meta) {
@@ -405,6 +413,10 @@ public class PersistentUnrolledVector {
 
 	public IPersistentMap meta() {
 	    return meta;
+	}
+
+	public static IPersistentVector create(IPersistentVector v) {
+	    return v;
 	}
 
 	public IObj withMeta(IPersistentMap meta) {
@@ -629,6 +641,10 @@ public class PersistentUnrolledVector {
 
 	public IPersistentMap meta() {
 	    return meta;
+	}
+
+	public static IPersistentVector create(IPersistentVector v) {
+	    return v;
 	}
 
 	public IObj withMeta(IPersistentMap meta) {
@@ -878,6 +894,10 @@ public class PersistentUnrolledVector {
 
 	public IPersistentMap meta() {
 	    return meta;
+	}
+
+	public static IPersistentVector create(IPersistentVector v) {
+	    return v;
 	}
 
 	public IObj withMeta(IPersistentMap meta) {
@@ -1153,6 +1173,10 @@ public class PersistentUnrolledVector {
 
 	public IPersistentMap meta() {
 	    return meta;
+	}
+
+	public static IPersistentVector create(IPersistentVector v) {
+	    return v;
 	}
 
 	public IObj withMeta(IPersistentMap meta) {
@@ -1454,6 +1478,10 @@ public class PersistentUnrolledVector {
 
 	public IPersistentMap meta() {
 	    return meta;
+	}
+
+	public static IPersistentVector create(IPersistentVector v) {
+	    return v;
 	}
 
 	public IObj withMeta(IPersistentMap meta) {
