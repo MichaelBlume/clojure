@@ -17,7 +17,7 @@ import java.util.Iterator;
 import java.util.Map;
 
 public class PersistentUnrolledMap {
-    static IPersistentMap EMPTY = new Card0();
+    public static IPersistentMap EMPTY = new Card0();
     static Object NOT_FOUND = new Object();
 
     public static IPersistentMap create() {

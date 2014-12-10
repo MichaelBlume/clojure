@@ -16,7 +16,7 @@ package clojure.lang;
 import java.util.Iterator;
 
 public class PersistentUnrolledVector {
-    static IPersistentVector EMPTY = new Card0();
+    public static IPersistentVector EMPTY = new Card0();
 
     public static IPersistentVector create() {
 	return EMPTY;
