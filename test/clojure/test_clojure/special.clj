@@ -70,3 +70,16 @@
   (let [{:keys [::s/x ::s/y]} {:clojure.string/x 1 :clojure.string/y 2}]
     (is (= x 1))
     (is (= y 2))))
+
+(deftest defaults-refer-to-enclosing-scope-in-map-destructuring
+  (is (= (let [foo 1
+               bar 0
+               {:keys [bar foo]
+                :or {foo 3 bar (inc foo)}} {}]
+           {:foo foo :bar bar})
+         (let [foo 1
+               bar 0
+               {:keys [foo bar]
+                :or {foo 3 bar (inc foo)}} {}]
+           {:foo foo :bar bar})
+         {:foo 3 :bar 2})))

@@ -4245,12 +4245,17 @@
                      (fn [bvec b v]
                        (let [gmap (gensym "map__")
                              gmapseq (with-meta gmap {:tag 'clojure.lang.ISeq})
+                             dmap (gensym "defaults__")
                              defaults (:or b)]
                          (loop [ret (-> bvec (conj gmap) (conj v)
                                         (conj gmap) (conj `(if (seq? ~gmap) (clojure.lang.PersistentHashMap/create (seq ~gmapseq)) ~gmap))
                                         ((fn [ret]
                                            (if (:as b)
                                              (conj ret (:as b) gmap)
+                                             ret)))
+                                        ((fn [ret]
+                                           (if defaults
+                                             (conj ret dmap (reduce1 (fn [out e] (assoc out (list 'quote (key e)) (val e))) {} defaults))
                                              ret))))
                                 bes (reduce1
                                      (fn [bes entry]
@@ -4265,7 +4270,7 @@
                                    bk (val (first bes))
                                    has-default (contains? defaults bb)]
                                (recur (pb ret bb (if has-default
-                                                   (list `get gmap bk (defaults bb))
+                                                   (list `get gmap bk `(get ~dmap '~bb))
                                                    (list `get gmap bk)))
                                       (next bes)))
                              ret))))]
