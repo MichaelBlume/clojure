@@ -4192,10 +4192,13 @@
                            (if (seq bs)
                              (let [firstb (first bs)]
                                (cond
-                                (= firstb '&) (recur (pb ret (second bs) (list `nthnext gvec n))
-                                                     n
-                                                     (nnext bs)
-                                                     true)
+                                (= firstb '&) (if seen-rest?
+                                                (throw (new Exception "Unsupported binding form, only :as can follow & parameter"))
+                                                (recur
+                                                  (pb ret (second bs) (list `nthnext gvec n))
+                                                  n
+                                                  (nnext bs)
+                                                  true))
                                 (= firstb :as) (pb ret (second bs) gvec)
                                 :else (if seen-rest?
                                         (throw (new Exception "Unsupported binding form, only :as can follow & parameter"))
