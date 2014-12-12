@@ -19,6 +19,7 @@ abstract class ATransientMap extends AFn implements ITransientMap {
 	abstract ITransientMap doAssoc(Object key, Object val);
 	abstract ITransientMap doWithout(Object key);
 	abstract Object doValAt(Object key, Object notFound);
+	abstract IMapEntry doEntryAt(Object key);
 	abstract int doCount();
 	abstract IPersistentMap doPersistent();
 
@@ -74,9 +75,18 @@ abstract class ATransientMap extends AFn implements ITransientMap {
 		return doPersistent();
 	}
 
+	public final IMapEntry entryAt(Object key) {
+		ensureEditable();
+		return doEntryAt(key);
+	}
+
 	public final Object valAt(Object key, Object notFound) {
 		ensureEditable();
 		return doValAt(key, notFound);
+	}
+
+	public boolean containsKey(Object key){
+		return valAt(key, this) != this;
 	}
 
 	public final int count() {
