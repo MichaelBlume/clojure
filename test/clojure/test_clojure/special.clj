@@ -52,6 +52,13 @@
     (is (= 1 b))
     (is (= 2 d))))
 
+(deftest only-one-rest-param-allowed
+  (is (thrown-with-msg?
+        Exception
+        #"Unsupported binding form, only :as can follow & parameter"
+        (eval '(let [[foo & bar & baz] []]
+                 [foo bar baz])))))
+
 (deftest keywords-not-allowed-in-let-bindings
   (is (thrown-with-msg? Exception #"Unsupported binding key: :a"
                         (eval '(let [:a 1] a))))
