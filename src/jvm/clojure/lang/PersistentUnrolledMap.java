@@ -342,6 +342,27 @@ public class PersistentUnrolledMap {
 	    }
 	}
 
+	IMapEntry doEntryAt(Object key) {
+	    int h = Util.hasheq(key);
+	    int idx = indexOf(h, key);
+	    switch (idx) {
+	    case 0:
+		return new MapEntry(k0, v0);
+	    case 1:
+		return new MapEntry(k1, v1);
+	    case 2:
+		return new MapEntry(k2, v2);
+	    case 3:
+		return new MapEntry(k3, v3);
+	    case 4:
+		return new MapEntry(k4, v4);
+	    case 5:
+		return new MapEntry(k5, v5);
+	    default:
+		return null;
+	    }
+	}
+
 	ITransientMap doWithout(Object key) {
 	    int h = Util.hasheq(key);
 	    int idx = indexOf(h, key);
