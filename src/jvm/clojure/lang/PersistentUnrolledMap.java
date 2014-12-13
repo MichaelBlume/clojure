@@ -414,7 +414,7 @@ public class PersistentUnrolledMap {
     }
 
     public static class Card0 extends APersistentMap implements IObj,
-	    IEditableCollection, IReduce {
+	    IEditableCollection, IReduce, IEditableMap {
 	private final IPersistentMap meta;
 
 	public static IPersistentMap create(IPersistentMap m) {
@@ -586,7 +586,7 @@ public class PersistentUnrolledMap {
     }
 
     public static class Card1 extends APersistentMap implements IObj,
-	    IEditableCollection, IReduce {
+	    IEditableCollection, IReduce, IEditableMap {
 	final Object k0;
 	final Object v0;
 	final int h0;
@@ -879,7 +879,7 @@ public class PersistentUnrolledMap {
     }
 
     public static class Card2 extends APersistentMap implements IObj,
-	    IEditableCollection, IReduce {
+	    IEditableCollection, IReduce, IEditableMap {
 	final Object k0;
 	final Object k1;
 	final Object v0;
@@ -1231,7 +1231,7 @@ public class PersistentUnrolledMap {
     }
 
     public static class Card3 extends APersistentMap implements IObj,
-	    IEditableCollection, IReduce {
+	    IEditableCollection, IReduce, IEditableMap {
 	final Object k0;
 	final Object k1;
 	final Object k2;
@@ -1644,7 +1644,7 @@ public class PersistentUnrolledMap {
     }
 
     public static class Card4 extends APersistentMap implements IObj,
-	    IEditableCollection, IReduce {
+	    IEditableCollection, IReduce, IEditableMap {
 	final Object k0;
 	final Object k1;
 	final Object k2;
@@ -2121,7 +2121,7 @@ public class PersistentUnrolledMap {
     }
 
     public static class Card5 extends APersistentMap implements IObj,
-	    IEditableCollection, IReduce {
+	    IEditableCollection, IReduce, IEditableMap {
 	final Object k0;
 	final Object k1;
 	final Object k2;
@@ -2663,7 +2663,7 @@ public class PersistentUnrolledMap {
     }
 
     public static class Card6 extends APersistentMap implements IObj,
-	    IEditableCollection, IReduce {
+	    IEditableCollection, IReduce, IEditableMap {
 	final Object k0;
 	final Object k1;
 	final Object k2;

@@ -16,7 +16,7 @@ import java.util.List;
 
 public class PersistentHashSet extends APersistentSet implements IObj, IEditableCollection {
 
-static public final PersistentHashSet EMPTY = new PersistentHashSet(null, PersistentArrayMap.EMPTY);
+static public final PersistentHashSet EMPTY = new PersistentHashSet(null, PersistentUnrolledMap.EMPTY);
 
 final IPersistentMap _meta;
 
