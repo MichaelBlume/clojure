@@ -711,6 +711,10 @@ static Object getFrom(Object coll, Object key){
 		IPersistentSet set = (IPersistentSet) coll;
 		return set.get(key);
 	}
+    else if(coll instanceof ITransientSet) {
+        ITransientSet set = (ITransientSet) coll;
+        return set.get(key);
+    }
 	else if(key instanceof Number && (coll instanceof String || coll instanceof List || coll.getClass().isArray())) {
 		int n = ((Number) key).intValue();
 		if(n >= 0 && n < count(coll))
@@ -742,6 +746,12 @@ static Object getFrom(Object coll, Object key, Object notFound){
 			return set.get(key);
 		return notFound;
 	}
+	else if(coll instanceof ITransientSet) {
+		ITransientSet set = (ITransientSet) coll;
+		if(set.contains(key))
+			return set.get(key);
+		return notFound;
+	}
 	else if(key instanceof Number && (coll instanceof String || coll.getClass().isArray())) {
 		int n = ((Number) key).intValue();
 		return n >= 0 && n < count(coll) ? nth(coll, n) : notFound;
@@ -756,6 +766,7 @@ static public Associative assoc(Object coll, Object key, Object val){
 	return ((Associative) coll).assoc(key, val);
 }
 
+private static final Object NOT_FOUND = new Object();
 static public Object contains(Object coll, Object key){
 	if(coll == null)
 		return F;
@@ -763,6 +774,10 @@ static public Object contains(Object coll, Object key){
 		return ((Associative) coll).containsKey(key) ? T : F;
 	else if(coll instanceof IPersistentSet)
 		return ((IPersistentSet) coll).contains(key) ? T : F;
+	else if(coll instanceof ITransientSet)
+		return ((ITransientSet)coll).contains(key);
+	else if(coll instanceof ITransientAssociative)
+		return (((ITransientAssociative)coll).valAt(key, NOT_FOUND) != NOT_FOUND);
 	else if(coll instanceof Map) {
 		Map m = (Map) coll;
 		return m.containsKey(key) ? T : F;
@@ -783,6 +798,12 @@ static public Object find(Object coll, Object key){
 		return null;
 	else if(coll instanceof Associative)
 		return ((Associative) coll).entryAt(key);
+	else if(coll instanceof ITransientAssociative) {
+		if(T.equals(contains(coll, key)))
+			return new MapEntry(key, ((ITransientAssociative)coll).valAt(key));
+		else
+			return null;
+	}
 	else {
 		Map m = (Map) coll;
 		if(m.containsKey(key))
