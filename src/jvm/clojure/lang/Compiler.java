@@ -6798,7 +6798,24 @@ public static Object eval(Object form, boolean freshLoader) {
 			line = RT.meta(form).valAt(RT.LINE_KEY);
 		if(RT.meta(form) != null && RT.meta(form).containsKey(RT.COLUMN_KEY))
 			column = RT.meta(form).valAt(RT.COLUMN_KEY);
-		Var.pushThreadBindings(RT.map(LINE, line, COLUMN, column));
+
+		ITransientMap bindings = (ITransientMap) ((IEditableCollection) RT.map(LINE, line, COLUMN, column)).asTransient();
+		if (VARS.isBound())
+			bindings = bindings.assoc(VARS, PersistentHashMap.EMPTY);
+		if (KEYWORDS.isBound())
+			bindings = bindings.assoc(KEYWORDS, PersistentHashMap.EMPTY);
+		if (CONSTANTS.isBound())
+			bindings = bindings.assoc(CONSTANTS, PersistentVector.EMPTY);
+		if (CONSTANT_IDS.isBound())
+			bindings = bindings.assoc(CONSTANT_IDS, new IdentityHashMap());
+		if (VAR_CALLSITES.isBound())
+			bindings = bindings.assoc(VAR_CALLSITES, emptyVarCallSites());
+		if (KEYWORD_CALLSITES.isBound())
+			bindings = bindings.assoc(KEYWORD_CALLSITES, PersistentVector.EMPTY);
+		if (PROTOCOL_CALLSITES.isBound())
+			bindings = bindings.assoc(PROTOCOL_CALLSITES, PersistentVector.EMPTY);
+
+		Var.pushThreadBindings(bindings.persistent());
 		try
 			{
 			form = macroexpand(form);
