@@ -6746,7 +6746,15 @@ public static Object eval(Object form, boolean freshLoader) {
 			line = RT.meta(form).valAt(RT.LINE_KEY);
 		if(RT.meta(form) != null && RT.meta(form).containsKey(RT.COLUMN_KEY))
 			column = RT.meta(form).valAt(RT.COLUMN_KEY);
-		Var.pushThreadBindings(RT.map(LINE, line, COLUMN, column));
+		Var.pushThreadBindings(RT.map(LINE, line,
+                                      COLUMN, column,
+                                      CONSTANTS, PersistentVector.EMPTY,
+                                      CONSTANT_IDS, new IdentityHashMap(),
+                                      KEYWORDS, PersistentHashMap.EMPTY,
+                                      VARS, PersistentHashMap.EMPTY,
+                                      KEYWORD_CALLSITES, PersistentVector.EMPTY,
+                                      PROTOCOL_CALLSITES, PersistentVector.EMPTY,
+                                      VAR_CALLSITES, emptyVarCallSites()));
 		try
 			{
 			form = macroexpand(form);
