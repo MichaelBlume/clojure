@@ -2724,7 +2724,7 @@
    :static true}
   ([n]
      (fn [rf]
-       (let [nv (volatile! n)]
+       (let [nv (volatile! (dec n))]
          (fn
            ([] (rf))
            ([result] (rf result))
