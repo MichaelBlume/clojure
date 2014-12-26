@@ -45,7 +45,7 @@ static public class Unbound extends AFn{
 }
 
 static class Frame{
-	final static Frame TOP = new Frame(PersistentHashMap.EMPTY, null);
+	final static Frame TOP = new Frame(PersistentUnrolledMap.EMPTY, null);
 	//Var->TBox
 	Associative bindings;
 	//Var->val
@@ -172,7 +172,7 @@ Var(Namespace ns, Symbol sym){
 	this.sym = sym;
 	this.threadBound = new AtomicBoolean(false);
 	this.root = new Unbound(this);
-	setMeta(PersistentHashMap.EMPTY);
+	setMeta(PersistentUnrolledMap.EMPTY);
 }
 
 Var(Namespace ns, Symbol sym, Object root){
@@ -338,7 +338,7 @@ public static void popThreadBindings(){
 
 public static Associative getThreadBindings(){
 	Frame f = dvals.get();
-	IPersistentMap ret = PersistentHashMap.EMPTY;
+	IPersistentMap ret = PersistentUnrolledMap.EMPTY;
 	for(ISeq bs = f.bindings.seq(); bs != null; bs = bs.next())
 		{
 		IMapEntry e = (IMapEntry) bs.first();
