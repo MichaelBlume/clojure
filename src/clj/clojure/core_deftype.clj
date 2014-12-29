@@ -627,7 +627,7 @@
                             (when (m (keyword mname))
                               (throw (IllegalArgumentException. (str "Function " mname " in protocol " name " was redefined. Specify all arities in single definition."))))
                             (assoc m (keyword mname)
-                                   (merge name-meta
+                                   (merge1 name-meta
                                           {:name (vary-meta mname assoc :doc doc :arglists arglists)
                                            :arglists arglists
                                            :doc doc}))))
@@ -643,7 +643,7 @@
      (alter-meta! (var ~name) assoc :doc ~(:doc opts))
      ~(when sigs
         `(#'assert-same-protocol (var ~name) '~(map :name (vals sigs))))
-     (alter-var-root (var ~name) merge 
+     (alter-var-root (var ~name) conj
                      (assoc ~opts 
                        :sigs '~sigs 
                        :var (var ~name)
@@ -658,7 +658,7 @@
                         ~(apply hash-map 
                                 (mapcat 
                                  (fn [s]
-                                   [`(intern *ns* (with-meta '~(:name s) (merge '~s {:protocol (var ~name)})))
+                                   [`(intern *ns* (with-meta '~(:name s) (assoc '~s :protocol (var ~name))))
                                     (emit-method-builder (:on-interface opts) (:name s) (:on s) (:arglists s))])
                                  (vals sigs)))))
      (-reset-methods ~name)

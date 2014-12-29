@@ -2877,35 +2877,11 @@
                       (when (comp i)
                         (range* i end step)))))))))
 
-(defn merge
-  "Returns a map that consists of the rest of the maps conj-ed onto
-  the first.  If a key occurs in more than one map, the mapping from
-  the latter (left-to-right) will be the mapping in the result."
-  {:added "1.0"
-   :static true}
-  [& maps]
-  (when (some identity maps)
-    (reduce1 #(conj (or %1 {}) %2) maps)))
-
-(defn merge-with
-  "Returns a map that consists of the rest of the maps conj-ed onto
-  the first.  If a key occurs in more than one map, the mapping(s)
-  from the latter (left-to-right) will be combined with the mapping in
-  the result by calling (f val-in-result val-in-latter)."
-  {:added "1.0"
-   :static true}
-  [f & maps]
-  (when (some identity maps)
-    (let [merge-entry (fn [m e]
-			(let [k (key e) v (val e)]
-			  (if (contains? m k)
-			    (assoc m k (f (get m k) v))
-			    (assoc m k v))))
-          merge2 (fn [m1 m2]
-		   (reduce1 merge-entry (or m1 {}) (seq m2)))]
-      (reduce1 merge2 maps))))
-
-
+(defn merge1
+  {:private true}
+  [m1 m2]
+  (when (or m1 m2)
+    (conj (or m1 {}) m2)))
 
 
 
@@ -5510,7 +5486,7 @@
         metadata   (when (map? (first references)) (first references))
         references (if metadata (next references) references)
         name (if metadata
-               (vary-meta name merge metadata)
+               (vary-meta name merge1 metadata)
                name)
         gen-class-clause (first (filter #(= :gen-class (first %)) references))
         gen-class-call
@@ -6080,7 +6056,7 @@
 (alter-meta! #'load-file assoc :added "1.0")
 
 (defmacro add-doc-and-meta {:private true} [name docstring meta]
-  `(alter-meta! (var ~name) merge (assoc ~meta :doc ~docstring)))
+  `(alter-meta! (var ~name) merge1 (assoc ~meta :doc ~docstring)))
 
 (add-doc-and-meta *file*
   "The path of the file being evaluated, as a String.
@@ -6702,6 +6678,78 @@
      (if (instance? clojure.lang.IEditableCollection to)
        (with-meta (persistent! (transduce xform conj! (transient to) from)) (meta to))
        (transduce xform conj to from))))
+
+(def ^:private merge-rf
+  (fn [result input]
+    (cond
+      (instance? java.util.Map$Entry input)
+      (conj result input)
+
+      (instance? clojure.lang.IPersistentVector input)
+      (conj result input)
+
+      :else
+      (reduce conj result input))))
+
+(def ^:private transient-merge-rf
+  (fn [result input]
+    (cond
+      (instance? java.util.Map$Entry input)
+      (conj! result input)
+
+      (instance? clojure.lang.IPersistentVector input)
+      (conj! result input)
+
+      :else
+      (reduce conj! result input))))
+
+(defn merge
+  "Returns a map that consists of the rest of the maps conj-ed onto
+  the first.  If a key occurs in more than one map, the mapping from
+  the latter (left-to-right) will be the mapping in the result."
+  {:added "1.0"
+   :static true}
+  ([& maps]
+   (when (some identity maps)
+     (let [m  (or (first maps) {})
+           mm (meta m)]
+       (if (instance? clojure.lang.IEditableCollection m)
+         (-> (reduce transient-merge-rf (transient m) (rest maps))
+             (persistent!)
+             (with-meta mm))
+         (reduce merge-rf m maps))))))
+
+(defn merge-with
+  "Returns a map that consists of the rest of the maps conj-ed onto
+  the first.  If a key occurs in more than one map, the mapping(s)
+  from the latter (left-to-right) will be combined with the mapping in
+  the result by calling (f val-in-result val-in-latter)."
+  {:added "1.0"
+   :static true}
+  [f & maps]
+  (when (some identity maps)
+    (let [m (or (first maps) {})]
+      (if (instance? clojure.lang.IEditableCollection m)
+        (let [merge-entry (fn
+                            ([m] (persistent! m))
+                            ([m e]
+                             (let [k (key e) v (val e)
+                                   prev (get m k ::none)]
+                               (if (= prev ::none)
+                                 (assoc! m k v)
+                                 (assoc! m k (f prev v))))))]
+          (with-meta
+            (transduce cat merge-entry (transient m) (rest maps))
+            (meta m)))
+        (let [merge-entry (fn
+                            ([m] m)
+                            ([m e]
+                             (let [k (key e) v (val e)
+                                   prev (get m k ::none)]
+                               (if (= prev ::none)
+                                 (assoc m k v)
+                                 (assoc m k (f prev v))))))]
+          (transduce cat merge-entry m (rest maps)))))))
 
 (defn mapv
   "Returns a vector consisting of the result of applying f to the
