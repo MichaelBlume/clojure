@@ -121,12 +121,24 @@
   (let [[mname] (remove valid-java-method-name (map (comp str first) methods))]
     (when mname (throw (IllegalArgumentException. (str "Not a valid method name: " mname))))))
 
+(defn- merge-with1
+  [f & maps]
+  (when (some identity maps)
+    (let [merge-entry (fn [m e]
+			(let [k (key e) v (val e)]
+			  (if (contains? m k)
+			    (assoc m k (f (get m k) v))
+			    (assoc m k v))))
+          merge2 (fn [m1 m2]
+		   (reduce1 merge-entry (or m1 {}) (seq m2)))]
+      (reduce1 merge2 maps))))
+
 (defn- generate-class [options-map]
   (validate-generate-class-options options-map)
   (let [default-options {:prefix "-" :load-impl-ns true :impl-ns (ns-name *ns*)}
         {:keys [name extends implements constructors methods main factory state init exposes 
                 exposes-methods prefix load-impl-ns impl-ns post-init]} 
-          (merge default-options options-map)
+          (merge1 default-options options-map)
         name-meta (meta name)
         name (str name)
         super (if extends (the-class extends) Object)
@@ -163,7 +175,7 @@
         ex-type  (totype java.lang.UnsupportedOperationException)
         all-sigs (distinct (concat (map #(let[[m p] (key %)] {m [p]}) (mapcat non-private-methods supers))
                                    (map (fn [[m p]] {(str m) [p]}) methods)))
-        sigs-by-name (apply merge-with concat {} all-sigs)
+        sigs-by-name (apply merge-with1 concat {} all-sigs)
         overloads (into1 {} (filter (fn [[m s]] (next s)) sigs-by-name))
         var-fields (concat (when init [init-name]) 
                            (when post-init [post-init-name])
