@@ -347,17 +347,17 @@ public class PersistentUnrolledMap {
 	    int idx = indexOf(h, key);
 	    switch (idx) {
 	    case 0:
-		return new MapEntry(k0, v0);
+		return new PersistentUnrolledVector.Card2(k0, v0);
 	    case 1:
-		return new MapEntry(k1, v1);
+		return new PersistentUnrolledVector.Card2(k1, v1);
 	    case 2:
-		return new MapEntry(k2, v2);
+		return new PersistentUnrolledVector.Card2(k2, v2);
 	    case 3:
-		return new MapEntry(k3, v3);
+		return new PersistentUnrolledVector.Card2(k3, v3);
 	    case 4:
-		return new MapEntry(k4, v4);
+		return new PersistentUnrolledVector.Card2(k4, v4);
 	    case 5:
-		return new MapEntry(k5, v5);
+		return new PersistentUnrolledVector.Card2(k5, v5);
 	    default:
 		return null;
 	    }
@@ -665,7 +665,7 @@ public class PersistentUnrolledMap {
 	    int idx = indexOf(Util.hasheq(key), key);
 	    switch (idx) {
 	    case 0:
-		return new MapEntry(k0, v0);
+		return new PersistentUnrolledVector.Card2(k0, v0);
 	    default:
 		return null;
 	    }
@@ -811,11 +811,11 @@ public class PersistentUnrolledMap {
 	}
 
 	public Object reduce(IFn f) {
-	    return new MapEntry(k0, v0);
+	    return PersistentUnrolledVector.create(k0, v0);
 	}
 
 	public Object reduce(IFn f, Object init) {
-	    init = f.invoke(init, new MapEntry(k0, v0));
+	    init = f.invoke(init, PersistentUnrolledVector.create(k0, v0));
 	    if (RT.isReduced(init)) {
 		return ((IDeref) init).deref();
 	    }
@@ -833,7 +833,7 @@ public class PersistentUnrolledMap {
 		public Object next() {
 		    switch (i++) {
 		    case 0:
-			return new MapEntry(k0, v0);
+			return PersistentUnrolledVector.create(k0, v0);
 		    default:
 			throw new IndexOutOfBoundsException();
 		    }
@@ -846,7 +846,7 @@ public class PersistentUnrolledMap {
 	}
 
 	public Object[] toArray() {
-	    return new Object[] { new MapEntry(k0, v0) };
+	    return new Object[] { PersistentUnrolledVector.create(k0, v0) };
 	}
 
 	class UnrolledChunkedSeq extends ASeq implements IChunkedSeq, Counted {
@@ -877,7 +877,7 @@ public class PersistentUnrolledMap {
 	    public Object first() {
 		switch (offset) {
 		case 0:
-		    return new MapEntry(k0, v0);
+		    return PersistentUnrolledVector.create(k0, v0);
 		}
 		throw new IndexOutOfBoundsException();
 	    }
@@ -972,9 +972,9 @@ public class PersistentUnrolledMap {
 	    int idx = indexOf(Util.hasheq(key), key);
 	    switch (idx) {
 	    case 0:
-		return new MapEntry(k0, v0);
+		return new PersistentUnrolledVector.Card2(k0, v0);
 	    case 1:
-		return new MapEntry(k1, v1);
+		return new PersistentUnrolledVector.Card2(k1, v1);
 	    default:
 		return null;
 	    }
@@ -1151,7 +1151,7 @@ public class PersistentUnrolledMap {
 
 	public Object reduce(IFn f) {
 	    Object init = k0;
-	    init = f.invoke(init, new MapEntry(k1, v1));
+	    init = f.invoke(init, PersistentUnrolledVector.create(k1, v1));
 	    if (RT.isReduced(init)) {
 		return ((IDeref) init).deref();
 	    }
@@ -1159,11 +1159,11 @@ public class PersistentUnrolledMap {
 	}
 
 	public Object reduce(IFn f, Object init) {
-	    init = f.invoke(init, new MapEntry(k0, v0));
+	    init = f.invoke(init, PersistentUnrolledVector.create(k0, v0));
 	    if (RT.isReduced(init)) {
 		return ((IDeref) init).deref();
 	    }
-	    init = f.invoke(init, new MapEntry(k1, v1));
+	    init = f.invoke(init, PersistentUnrolledVector.create(k1, v1));
 	    if (RT.isReduced(init)) {
 		return ((IDeref) init).deref();
 	    }
@@ -1181,9 +1181,9 @@ public class PersistentUnrolledMap {
 		public Object next() {
 		    switch (i++) {
 		    case 0:
-			return new MapEntry(k0, v0);
+			return PersistentUnrolledVector.create(k0, v0);
 		    case 1:
-			return new MapEntry(k1, v1);
+			return PersistentUnrolledVector.create(k1, v1);
 		    default:
 			throw new IndexOutOfBoundsException();
 		    }
@@ -1196,7 +1196,8 @@ public class PersistentUnrolledMap {
 	}
 
 	public Object[] toArray() {
-	    return new Object[] { new MapEntry(k0, v0), new MapEntry(k1, v1) };
+	    return new Object[] { PersistentUnrolledVector.create(k0, v0),
+		    PersistentUnrolledVector.create(k1, v1) };
 	}
 
 	class UnrolledChunkedSeq extends ASeq implements IChunkedSeq, Counted {
@@ -1227,9 +1228,9 @@ public class PersistentUnrolledMap {
 	    public Object first() {
 		switch (offset) {
 		case 0:
-		    return new MapEntry(k0, v0);
+		    return PersistentUnrolledVector.create(k0, v0);
 		case 1:
-		    return new MapEntry(k1, v1);
+		    return PersistentUnrolledVector.create(k1, v1);
 		}
 		throw new IndexOutOfBoundsException();
 	    }
@@ -1338,11 +1339,11 @@ public class PersistentUnrolledMap {
 	    int idx = indexOf(Util.hasheq(key), key);
 	    switch (idx) {
 	    case 0:
-		return new MapEntry(k0, v0);
+		return new PersistentUnrolledVector.Card2(k0, v0);
 	    case 1:
-		return new MapEntry(k1, v1);
+		return new PersistentUnrolledVector.Card2(k1, v1);
 	    case 2:
-		return new MapEntry(k2, v2);
+		return new PersistentUnrolledVector.Card2(k2, v2);
 	    default:
 		return null;
 	    }
@@ -1551,11 +1552,11 @@ public class PersistentUnrolledMap {
 
 	public Object reduce(IFn f) {
 	    Object init = k0;
-	    init = f.invoke(init, new MapEntry(k1, v1));
+	    init = f.invoke(init, PersistentUnrolledVector.create(k1, v1));
 	    if (RT.isReduced(init)) {
 		return ((IDeref) init).deref();
 	    }
-	    init = f.invoke(init, new MapEntry(k2, v2));
+	    init = f.invoke(init, PersistentUnrolledVector.create(k2, v2));
 	    if (RT.isReduced(init)) {
 		return ((IDeref) init).deref();
 	    }
@@ -1563,15 +1564,15 @@ public class PersistentUnrolledMap {
 	}
 
 	public Object reduce(IFn f, Object init) {
-	    init = f.invoke(init, new MapEntry(k0, v0));
+	    init = f.invoke(init, PersistentUnrolledVector.create(k0, v0));
 	    if (RT.isReduced(init)) {
 		return ((IDeref) init).deref();
 	    }
-	    init = f.invoke(init, new MapEntry(k1, v1));
+	    init = f.invoke(init, PersistentUnrolledVector.create(k1, v1));
 	    if (RT.isReduced(init)) {
 		return ((IDeref) init).deref();
 	    }
-	    init = f.invoke(init, new MapEntry(k2, v2));
+	    init = f.invoke(init, PersistentUnrolledVector.create(k2, v2));
 	    if (RT.isReduced(init)) {
 		return ((IDeref) init).deref();
 	    }
@@ -1589,11 +1590,11 @@ public class PersistentUnrolledMap {
 		public Object next() {
 		    switch (i++) {
 		    case 0:
-			return new MapEntry(k0, v0);
+			return PersistentUnrolledVector.create(k0, v0);
 		    case 1:
-			return new MapEntry(k1, v1);
+			return PersistentUnrolledVector.create(k1, v1);
 		    case 2:
-			return new MapEntry(k2, v2);
+			return PersistentUnrolledVector.create(k2, v2);
 		    default:
 			throw new IndexOutOfBoundsException();
 		    }
@@ -1606,8 +1607,9 @@ public class PersistentUnrolledMap {
 	}
 
 	public Object[] toArray() {
-	    return new Object[] { new MapEntry(k0, v0), new MapEntry(k1, v1),
-		    new MapEntry(k2, v2) };
+	    return new Object[] { PersistentUnrolledVector.create(k0, v0),
+		    PersistentUnrolledVector.create(k1, v1),
+		    PersistentUnrolledVector.create(k2, v2) };
 	}
 
 	class UnrolledChunkedSeq extends ASeq implements IChunkedSeq, Counted {
@@ -1638,11 +1640,11 @@ public class PersistentUnrolledMap {
 	    public Object first() {
 		switch (offset) {
 		case 0:
-		    return new MapEntry(k0, v0);
+		    return PersistentUnrolledVector.create(k0, v0);
 		case 1:
-		    return new MapEntry(k1, v1);
+		    return PersistentUnrolledVector.create(k1, v1);
 		case 2:
-		    return new MapEntry(k2, v2);
+		    return PersistentUnrolledVector.create(k2, v2);
 		}
 		throw new IndexOutOfBoundsException();
 	    }
@@ -1767,13 +1769,13 @@ public class PersistentUnrolledMap {
 	    int idx = indexOf(Util.hasheq(key), key);
 	    switch (idx) {
 	    case 0:
-		return new MapEntry(k0, v0);
+		return new PersistentUnrolledVector.Card2(k0, v0);
 	    case 1:
-		return new MapEntry(k1, v1);
+		return new PersistentUnrolledVector.Card2(k1, v1);
 	    case 2:
-		return new MapEntry(k2, v2);
+		return new PersistentUnrolledVector.Card2(k2, v2);
 	    case 3:
-		return new MapEntry(k3, v3);
+		return new PersistentUnrolledVector.Card2(k3, v3);
 	    default:
 		return null;
 	    }
@@ -2016,15 +2018,15 @@ public class PersistentUnrolledMap {
 
 	public Object reduce(IFn f) {
 	    Object init = k0;
-	    init = f.invoke(init, new MapEntry(k1, v1));
+	    init = f.invoke(init, PersistentUnrolledVector.create(k1, v1));
 	    if (RT.isReduced(init)) {
 		return ((IDeref) init).deref();
 	    }
-	    init = f.invoke(init, new MapEntry(k2, v2));
+	    init = f.invoke(init, PersistentUnrolledVector.create(k2, v2));
 	    if (RT.isReduced(init)) {
 		return ((IDeref) init).deref();
 	    }
-	    init = f.invoke(init, new MapEntry(k3, v3));
+	    init = f.invoke(init, PersistentUnrolledVector.create(k3, v3));
 	    if (RT.isReduced(init)) {
 		return ((IDeref) init).deref();
 	    }
@@ -2032,19 +2034,19 @@ public class PersistentUnrolledMap {
 	}
 
 	public Object reduce(IFn f, Object init) {
-	    init = f.invoke(init, new MapEntry(k0, v0));
+	    init = f.invoke(init, PersistentUnrolledVector.create(k0, v0));
 	    if (RT.isReduced(init)) {
 		return ((IDeref) init).deref();
 	    }
-	    init = f.invoke(init, new MapEntry(k1, v1));
+	    init = f.invoke(init, PersistentUnrolledVector.create(k1, v1));
 	    if (RT.isReduced(init)) {
 		return ((IDeref) init).deref();
 	    }
-	    init = f.invoke(init, new MapEntry(k2, v2));
+	    init = f.invoke(init, PersistentUnrolledVector.create(k2, v2));
 	    if (RT.isReduced(init)) {
 		return ((IDeref) init).deref();
 	    }
-	    init = f.invoke(init, new MapEntry(k3, v3));
+	    init = f.invoke(init, PersistentUnrolledVector.create(k3, v3));
 	    if (RT.isReduced(init)) {
 		return ((IDeref) init).deref();
 	    }
@@ -2062,13 +2064,13 @@ public class PersistentUnrolledMap {
 		public Object next() {
 		    switch (i++) {
 		    case 0:
-			return new MapEntry(k0, v0);
+			return PersistentUnrolledVector.create(k0, v0);
 		    case 1:
-			return new MapEntry(k1, v1);
+			return PersistentUnrolledVector.create(k1, v1);
 		    case 2:
-			return new MapEntry(k2, v2);
+			return PersistentUnrolledVector.create(k2, v2);
 		    case 3:
-			return new MapEntry(k3, v3);
+			return PersistentUnrolledVector.create(k3, v3);
 		    default:
 			throw new IndexOutOfBoundsException();
 		    }
@@ -2081,8 +2083,10 @@ public class PersistentUnrolledMap {
 	}
 
 	public Object[] toArray() {
-	    return new Object[] { new MapEntry(k0, v0), new MapEntry(k1, v1),
-		    new MapEntry(k2, v2), new MapEntry(k3, v3) };
+	    return new Object[] { PersistentUnrolledVector.create(k0, v0),
+		    PersistentUnrolledVector.create(k1, v1),
+		    PersistentUnrolledVector.create(k2, v2),
+		    PersistentUnrolledVector.create(k3, v3) };
 	}
 
 	class UnrolledChunkedSeq extends ASeq implements IChunkedSeq, Counted {
@@ -2113,13 +2117,13 @@ public class PersistentUnrolledMap {
 	    public Object first() {
 		switch (offset) {
 		case 0:
-		    return new MapEntry(k0, v0);
+		    return PersistentUnrolledVector.create(k0, v0);
 		case 1:
-		    return new MapEntry(k1, v1);
+		    return PersistentUnrolledVector.create(k1, v1);
 		case 2:
-		    return new MapEntry(k2, v2);
+		    return PersistentUnrolledVector.create(k2, v2);
 		case 3:
-		    return new MapEntry(k3, v3);
+		    return PersistentUnrolledVector.create(k3, v3);
 		}
 		throw new IndexOutOfBoundsException();
 	    }
@@ -2257,15 +2261,15 @@ public class PersistentUnrolledMap {
 	    int idx = indexOf(Util.hasheq(key), key);
 	    switch (idx) {
 	    case 0:
-		return new MapEntry(k0, v0);
+		return new PersistentUnrolledVector.Card2(k0, v0);
 	    case 1:
-		return new MapEntry(k1, v1);
+		return new PersistentUnrolledVector.Card2(k1, v1);
 	    case 2:
-		return new MapEntry(k2, v2);
+		return new PersistentUnrolledVector.Card2(k2, v2);
 	    case 3:
-		return new MapEntry(k3, v3);
+		return new PersistentUnrolledVector.Card2(k3, v3);
 	    case 4:
-		return new MapEntry(k4, v4);
+		return new PersistentUnrolledVector.Card2(k4, v4);
 	    default:
 		return null;
 	    }
@@ -2545,19 +2549,19 @@ public class PersistentUnrolledMap {
 
 	public Object reduce(IFn f) {
 	    Object init = k0;
-	    init = f.invoke(init, new MapEntry(k1, v1));
+	    init = f.invoke(init, PersistentUnrolledVector.create(k1, v1));
 	    if (RT.isReduced(init)) {
 		return ((IDeref) init).deref();
 	    }
-	    init = f.invoke(init, new MapEntry(k2, v2));
+	    init = f.invoke(init, PersistentUnrolledVector.create(k2, v2));
 	    if (RT.isReduced(init)) {
 		return ((IDeref) init).deref();
 	    }
-	    init = f.invoke(init, new MapEntry(k3, v3));
+	    init = f.invoke(init, PersistentUnrolledVector.create(k3, v3));
 	    if (RT.isReduced(init)) {
 		return ((IDeref) init).deref();
 	    }
-	    init = f.invoke(init, new MapEntry(k4, v4));
+	    init = f.invoke(init, PersistentUnrolledVector.create(k4, v4));
 	    if (RT.isReduced(init)) {
 		return ((IDeref) init).deref();
 	    }
@@ -2565,23 +2569,23 @@ public class PersistentUnrolledMap {
 	}
 
 	public Object reduce(IFn f, Object init) {
-	    init = f.invoke(init, new MapEntry(k0, v0));
+	    init = f.invoke(init, PersistentUnrolledVector.create(k0, v0));
 	    if (RT.isReduced(init)) {
 		return ((IDeref) init).deref();
 	    }
-	    init = f.invoke(init, new MapEntry(k1, v1));
+	    init = f.invoke(init, PersistentUnrolledVector.create(k1, v1));
 	    if (RT.isReduced(init)) {
 		return ((IDeref) init).deref();
 	    }
-	    init = f.invoke(init, new MapEntry(k2, v2));
+	    init = f.invoke(init, PersistentUnrolledVector.create(k2, v2));
 	    if (RT.isReduced(init)) {
 		return ((IDeref) init).deref();
 	    }
-	    init = f.invoke(init, new MapEntry(k3, v3));
+	    init = f.invoke(init, PersistentUnrolledVector.create(k3, v3));
 	    if (RT.isReduced(init)) {
 		return ((IDeref) init).deref();
 	    }
-	    init = f.invoke(init, new MapEntry(k4, v4));
+	    init = f.invoke(init, PersistentUnrolledVector.create(k4, v4));
 	    if (RT.isReduced(init)) {
 		return ((IDeref) init).deref();
 	    }
@@ -2599,15 +2603,15 @@ public class PersistentUnrolledMap {
 		public Object next() {
 		    switch (i++) {
 		    case 0:
-			return new MapEntry(k0, v0);
+			return PersistentUnrolledVector.create(k0, v0);
 		    case 1:
-			return new MapEntry(k1, v1);
+			return PersistentUnrolledVector.create(k1, v1);
 		    case 2:
-			return new MapEntry(k2, v2);
+			return PersistentUnrolledVector.create(k2, v2);
 		    case 3:
-			return new MapEntry(k3, v3);
+			return PersistentUnrolledVector.create(k3, v3);
 		    case 4:
-			return new MapEntry(k4, v4);
+			return PersistentUnrolledVector.create(k4, v4);
 		    default:
 			throw new IndexOutOfBoundsException();
 		    }
@@ -2620,9 +2624,11 @@ public class PersistentUnrolledMap {
 	}
 
 	public Object[] toArray() {
-	    return new Object[] { new MapEntry(k0, v0), new MapEntry(k1, v1),
-		    new MapEntry(k2, v2), new MapEntry(k3, v3),
-		    new MapEntry(k4, v4) };
+	    return new Object[] { PersistentUnrolledVector.create(k0, v0),
+		    PersistentUnrolledVector.create(k1, v1),
+		    PersistentUnrolledVector.create(k2, v2),
+		    PersistentUnrolledVector.create(k3, v3),
+		    PersistentUnrolledVector.create(k4, v4) };
 	}
 
 	class UnrolledChunkedSeq extends ASeq implements IChunkedSeq, Counted {
@@ -2653,15 +2659,15 @@ public class PersistentUnrolledMap {
 	    public Object first() {
 		switch (offset) {
 		case 0:
-		    return new MapEntry(k0, v0);
+		    return PersistentUnrolledVector.create(k0, v0);
 		case 1:
-		    return new MapEntry(k1, v1);
+		    return PersistentUnrolledVector.create(k1, v1);
 		case 2:
-		    return new MapEntry(k2, v2);
+		    return PersistentUnrolledVector.create(k2, v2);
 		case 3:
-		    return new MapEntry(k3, v3);
+		    return PersistentUnrolledVector.create(k3, v3);
 		case 4:
-		    return new MapEntry(k4, v4);
+		    return PersistentUnrolledVector.create(k4, v4);
 		}
 		throw new IndexOutOfBoundsException();
 	    }
@@ -2814,17 +2820,17 @@ public class PersistentUnrolledMap {
 	    int idx = indexOf(Util.hasheq(key), key);
 	    switch (idx) {
 	    case 0:
-		return new MapEntry(k0, v0);
+		return new PersistentUnrolledVector.Card2(k0, v0);
 	    case 1:
-		return new MapEntry(k1, v1);
+		return new PersistentUnrolledVector.Card2(k1, v1);
 	    case 2:
-		return new MapEntry(k2, v2);
+		return new PersistentUnrolledVector.Card2(k2, v2);
 	    case 3:
-		return new MapEntry(k3, v3);
+		return new PersistentUnrolledVector.Card2(k3, v3);
 	    case 4:
-		return new MapEntry(k4, v4);
+		return new PersistentUnrolledVector.Card2(k4, v4);
 	    case 5:
-		return new MapEntry(k5, v5);
+		return new PersistentUnrolledVector.Card2(k5, v5);
 	    default:
 		return null;
 	    }
@@ -3141,23 +3147,23 @@ public class PersistentUnrolledMap {
 
 	public Object reduce(IFn f) {
 	    Object init = k0;
-	    init = f.invoke(init, new MapEntry(k1, v1));
+	    init = f.invoke(init, PersistentUnrolledVector.create(k1, v1));
 	    if (RT.isReduced(init)) {
 		return ((IDeref) init).deref();
 	    }
-	    init = f.invoke(init, new MapEntry(k2, v2));
+	    init = f.invoke(init, PersistentUnrolledVector.create(k2, v2));
 	    if (RT.isReduced(init)) {
 		return ((IDeref) init).deref();
 	    }
-	    init = f.invoke(init, new MapEntry(k3, v3));
+	    init = f.invoke(init, PersistentUnrolledVector.create(k3, v3));
 	    if (RT.isReduced(init)) {
 		return ((IDeref) init).deref();
 	    }
-	    init = f.invoke(init, new MapEntry(k4, v4));
+	    init = f.invoke(init, PersistentUnrolledVector.create(k4, v4));
 	    if (RT.isReduced(init)) {
 		return ((IDeref) init).deref();
 	    }
-	    init = f.invoke(init, new MapEntry(k5, v5));
+	    init = f.invoke(init, PersistentUnrolledVector.create(k5, v5));
 	    if (RT.isReduced(init)) {
 		return ((IDeref) init).deref();
 	    }
@@ -3165,27 +3171,27 @@ public class PersistentUnrolledMap {
 	}
 
 	public Object reduce(IFn f, Object init) {
-	    init = f.invoke(init, new MapEntry(k0, v0));
+	    init = f.invoke(init, PersistentUnrolledVector.create(k0, v0));
 	    if (RT.isReduced(init)) {
 		return ((IDeref) init).deref();
 	    }
-	    init = f.invoke(init, new MapEntry(k1, v1));
+	    init = f.invoke(init, PersistentUnrolledVector.create(k1, v1));
 	    if (RT.isReduced(init)) {
 		return ((IDeref) init).deref();
 	    }
-	    init = f.invoke(init, new MapEntry(k2, v2));
+	    init = f.invoke(init, PersistentUnrolledVector.create(k2, v2));
 	    if (RT.isReduced(init)) {
 		return ((IDeref) init).deref();
 	    }
-	    init = f.invoke(init, new MapEntry(k3, v3));
+	    init = f.invoke(init, PersistentUnrolledVector.create(k3, v3));
 	    if (RT.isReduced(init)) {
 		return ((IDeref) init).deref();
 	    }
-	    init = f.invoke(init, new MapEntry(k4, v4));
+	    init = f.invoke(init, PersistentUnrolledVector.create(k4, v4));
 	    if (RT.isReduced(init)) {
 		return ((IDeref) init).deref();
 	    }
-	    init = f.invoke(init, new MapEntry(k5, v5));
+	    init = f.invoke(init, PersistentUnrolledVector.create(k5, v5));
 	    if (RT.isReduced(init)) {
 		return ((IDeref) init).deref();
 	    }
@@ -3203,17 +3209,17 @@ public class PersistentUnrolledMap {
 		public Object next() {
 		    switch (i++) {
 		    case 0:
-			return new MapEntry(k0, v0);
+			return PersistentUnrolledVector.create(k0, v0);
 		    case 1:
-			return new MapEntry(k1, v1);
+			return PersistentUnrolledVector.create(k1, v1);
 		    case 2:
-			return new MapEntry(k2, v2);
+			return PersistentUnrolledVector.create(k2, v2);
 		    case 3:
-			return new MapEntry(k3, v3);
+			return PersistentUnrolledVector.create(k3, v3);
 		    case 4:
-			return new MapEntry(k4, v4);
+			return PersistentUnrolledVector.create(k4, v4);
 		    case 5:
-			return new MapEntry(k5, v5);
+			return PersistentUnrolledVector.create(k5, v5);
 		    default:
 			throw new IndexOutOfBoundsException();
 		    }
@@ -3226,9 +3232,12 @@ public class PersistentUnrolledMap {
 	}
 
 	public Object[] toArray() {
-	    return new Object[] { new MapEntry(k0, v0), new MapEntry(k1, v1),
-		    new MapEntry(k2, v2), new MapEntry(k3, v3),
-		    new MapEntry(k4, v4), new MapEntry(k5, v5) };
+	    return new Object[] { PersistentUnrolledVector.create(k0, v0),
+		    PersistentUnrolledVector.create(k1, v1),
+		    PersistentUnrolledVector.create(k2, v2),
+		    PersistentUnrolledVector.create(k3, v3),
+		    PersistentUnrolledVector.create(k4, v4),
+		    PersistentUnrolledVector.create(k5, v5) };
 	}
 
 	class UnrolledChunkedSeq extends ASeq implements IChunkedSeq, Counted {
@@ -3259,17 +3268,17 @@ public class PersistentUnrolledMap {
 	    public Object first() {
 		switch (offset) {
 		case 0:
-		    return new MapEntry(k0, v0);
+		    return PersistentUnrolledVector.create(k0, v0);
 		case 1:
-		    return new MapEntry(k1, v1);
+		    return PersistentUnrolledVector.create(k1, v1);
 		case 2:
-		    return new MapEntry(k2, v2);
+		    return PersistentUnrolledVector.create(k2, v2);
 		case 3:
-		    return new MapEntry(k3, v3);
+		    return PersistentUnrolledVector.create(k3, v3);
 		case 4:
-		    return new MapEntry(k4, v4);
+		    return PersistentUnrolledVector.create(k4, v4);
 		case 5:
-		    return new MapEntry(k5, v5);
+		    return PersistentUnrolledVector.create(k5, v5);
 		}
 		throw new IndexOutOfBoundsException();
 	    }
