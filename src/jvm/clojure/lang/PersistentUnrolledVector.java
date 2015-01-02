@@ -1774,14 +1774,14 @@ public class PersistentUnrolledVector {
     }
 
     static class Transient extends AFn implements ITransientVector, Counted {
-	Object e0;
-	Object e1;
-	Object e2;
-	Object e3;
-	Object e4;
-	Object e5;
-	private int count;
-	private transient boolean edit = true;
+	volatile Object e0;
+	volatile Object e1;
+	volatile Object e2;
+	volatile Object e3;
+	volatile Object e4;
+	volatile Object e5;
+	private volatile int count;
+	private transient volatile boolean edit = true;
 
 	Transient() {
 	    this.count = 0;

@@ -62,26 +62,26 @@ public class PersistentUnrolledMap {
     }
 
     static class Transient extends ATransientMap implements ITransientMap {
-	private Object k0;
-	private Object k1;
-	private Object k2;
-	private Object k3;
-	private Object k4;
-	private Object k5;
-	private Object v0;
-	private Object v1;
-	private Object v2;
-	private Object v3;
-	private Object v4;
-	private Object v5;
-	private int h0;
-	private int h1;
-	private int h2;
-	private int h3;
-	private int h4;
-	private int h5;
-	private int count = 0;
-	private boolean edit = true;
+	private volatile Object k0;
+	private volatile Object k1;
+	private volatile Object k2;
+	private volatile Object k3;
+	private volatile Object k4;
+	private volatile Object k5;
+	private volatile Object v0;
+	private volatile Object v1;
+	private volatile Object v2;
+	private volatile Object v3;
+	private volatile Object v4;
+	private volatile Object v5;
+	private volatile int h0;
+	private volatile int h1;
+	private volatile int h2;
+	private volatile int h3;
+	private volatile int h4;
+	private volatile int h5;
+	private volatile int count = 0;
+	private volatile boolean edit = true;
 
 	public Transient() {
 	    count = 0;
