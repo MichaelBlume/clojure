@@ -6770,19 +6770,19 @@ public static Object eval(Object form, boolean freshLoader) {
 
 		ITransientMap bindings = (ITransientMap) ((IEditableCollection) RT.map(LINE, line, COLUMN, column)).asTransient();
 		if (VARS.isBound())
-			bindings = bindings.assoc(VARS, PersistentHashMap.EMPTY);
+			bindings = bindings.assoc(VARS, PersistentUnrolledMap.EMPTY);
 		if (KEYWORDS.isBound())
-			bindings = bindings.assoc(KEYWORDS, PersistentHashMap.EMPTY);
+			bindings = bindings.assoc(KEYWORDS, PersistentUnrolledMap.EMPTY);
 		if (CONSTANTS.isBound())
-			bindings = bindings.assoc(CONSTANTS, PersistentVector.EMPTY);
+			bindings = bindings.assoc(CONSTANTS, PersistentUnrolledVector.EMPTY);
 		if (CONSTANT_IDS.isBound())
 			bindings = bindings.assoc(CONSTANT_IDS, new IdentityHashMap());
 		if (VAR_CALLSITES.isBound())
 			bindings = bindings.assoc(VAR_CALLSITES, emptyVarCallSites());
 		if (KEYWORD_CALLSITES.isBound())
-			bindings = bindings.assoc(KEYWORD_CALLSITES, PersistentVector.EMPTY);
+			bindings = bindings.assoc(KEYWORD_CALLSITES, PersistentUnrolledVector.EMPTY);
 		if (PROTOCOL_CALLSITES.isBound())
-			bindings = bindings.assoc(PROTOCOL_CALLSITES, PersistentVector.EMPTY);
+			bindings = bindings.assoc(PROTOCOL_CALLSITES, PersistentUnrolledVector.EMPTY);
 
 		Var.pushThreadBindings(bindings.persistent());
 		try
