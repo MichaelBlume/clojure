@@ -170,7 +170,21 @@ public boolean isEmpty(){
 }
 
 public Iterator iterator(){
-	return new SeqIterator(this);
+    return new Iterator() {
+        private final Iterator iter = impl.iterator();
+
+        public boolean hasNext() {
+            return iter.hasNext();
+        }
+
+        public Object next() {
+            return ((IMapEntry)iter.next()).key();
+        }
+
+        public void remove() {
+            throw new UnsupportedOperationException();
+        }
+    };
 }
 
 }

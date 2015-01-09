@@ -194,6 +194,23 @@ static public class ValSeq extends ASeq{
 	}
 }
 
+static IFn MAKE_ENTRY = new AFn() {
+    public Object invoke(Object key, Object val) {
+        return new MapEntry(key, val);
+    }
+};
+
+static IFn MAKE_KEY = new AFn() {
+    public Object invoke(Object key, Object val) {
+        return key;
+    }
+};
+
+static IFn MAKE_VAL = new AFn() {
+    public Object invoke(Object key, Object val) {
+        return val;
+    }
+};
 
 public Object invoke(Object arg1) {
 	return valAt(arg1);
