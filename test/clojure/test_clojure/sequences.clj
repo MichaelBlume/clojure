@@ -11,7 +11,8 @@
 
 (ns clojure.test-clojure.sequences
   (:import [clojure.lang ArraySeq PersistentList PersistentVector IReduce]
-           [java.util ArrayList List])
+           [java.util ArrayList List]
+           [java.lang Iterable])
   (:require [clojure.test :refer :all]
             [clojure.test.check :as chk]
             [clojure.test.check.generators :as gen]
@@ -26,6 +27,13 @@
   ([a b c] (as-rest-args a b c))
   ([a b c d] (as-rest-args a b c d))
   ([a b c d e & rst] (apply as-rest-args a b c d e rst)))
+
+(defn iterator [s]
+  (iterator-seq
+    (.iterator
+      (if (instance? Iterable s)
+        s
+        (or (seq s) ())))))
 
 (defmacro literal [s]
   `{:val ~s :desc '~s})
@@ -44,6 +52,7 @@
    (call-last filter (constantly true))
    (call-last into [])
    (literal seq)
+   (literal iterator)
    (literal into-array)
    (call-last apply list)
    (literal vec)
