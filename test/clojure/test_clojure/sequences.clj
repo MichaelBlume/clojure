@@ -73,6 +73,7 @@
 (def empties
   [(literal ())
    (literal [])
+   (literal #{})
    (literal PersistentList/EMPTY)
    (literal PersistentVector/EMPTY)])
 
