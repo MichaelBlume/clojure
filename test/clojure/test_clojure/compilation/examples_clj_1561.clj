@@ -111,3 +111,11 @@
               t))]
     (:foo
      (get-map))))
+
+(defn invoke-cast
+  "I throw an exception casting to IFn in an invoke form."
+  []
+  ;; This code formatting is intentional.
+  (
+   (identity 1)
+   (identity nil)))
