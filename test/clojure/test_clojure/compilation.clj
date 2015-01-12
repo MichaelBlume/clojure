@@ -298,8 +298,8 @@
     (is (fails-on-line-number?  74 clj-1561/static-method))
     (is (fails-on-line-number?  80 clj-1561/static-method-reflected))
     (is (fails-on-line-number?  86 clj-1561/static-method-unboxed))
-    ; TODO: is there a way to test the logic for KeywordInvokeExpr?
     (is (fails-on-line-number?  92 clj-1561/invoke))
     (is (fails-on-line-number? 101 clj-1561/threading))
+    (is (fails-on-line-number? 112 clj-1561/keyword-invoke))
     ; TODO: is there any ways to test the logic inside of InvokeExpr.emit?
     ))

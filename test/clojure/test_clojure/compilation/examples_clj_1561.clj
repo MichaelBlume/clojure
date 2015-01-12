@@ -101,3 +101,13 @@
       ((identity nil))
       (identity)
       (identity)))
+
+(defn keyword-invoke
+  "I throw an exception in a keyword invoke."
+  []
+  (letfn [(get-map []
+            (let [t (transient {})]
+              (persistent! t)
+              t))]
+    (:foo
+     (get-map))))
