@@ -12,7 +12,8 @@
 (ns clojure.test-clojure.compilation
   (:import (clojure.lang Compiler Compiler$CompilerException))
   (:require [clojure.test.generative :refer (defspec)]
-            [clojure.data.generators :as gen])
+            [clojure.data.generators :as gen]
+            [clojure.test-clojure.compilation.examples-clj-1561 :as clj-1561])
   (:use clojure.test
         [clojure.test-helper :only (should-not-reflect should-print-err-message)]))
 
@@ -264,3 +265,34 @@
   (is (= clojure.test_clojure.compilation.examples.T
          (class (clojure.test_clojure.compilation.examples.T.))
          (class (clojure.test-clojure.compilation.examples/->T)))))
+
+(deftest CLJ-1561
+  (let [fails-on-line-number? (fn [expected function]
+                                 (try
+                                   (function)
+                                   nil
+                                   (catch Throwable t
+                                     (let [frames (filter #(= "examples_clj_1561.clj" (.getFileName %))
+                                                          (.getStackTrace t))
+                                           _ (if (zero? (count frames))
+                                               (.printStackTrace t)
+                                               )
+                                           actual (.getLineNumber ^StackTraceElement (first frames))]
+                                       (= expected actual)))))]
+    (is (fails-on-line-number?  13 clj-1561/instance-field))
+    (is (fails-on-line-number?  19 clj-1561/instance-field-reflected))
+    (is (fails-on-line-number?  25 clj-1561/instance-field-unboxed))
+    (is (fails-on-line-number?  32 clj-1561/instance-field-assign))
+    (is (fails-on-line-number?  40 clj-1561/instance-field-assign-reflected))
+    (is (fails-on-line-number?  47 clj-1561/static-field-assign))
+    (is (fails-on-line-number?  54 clj-1561/instance-method))
+    (is (fails-on-line-number?  61 clj-1561/instance-method-reflected))
+    (is (fails-on-line-number?  68 clj-1561/instance-method-unboxed))
+    (is (fails-on-line-number?  74 clj-1561/static-method))
+    (is (fails-on-line-number?  80 clj-1561/static-method-reflected))
+    (is (fails-on-line-number?  86 clj-1561/static-method-unboxed))
+    ; TODO: is there a way to test the logic for KeywordInvokeExpr?
+    (is (fails-on-line-number?  92 clj-1561/invoke))
+    (is (fails-on-line-number? 101 clj-1561/threading))
+    ; TODO: is there any ways to test the logic inside of InvokeExpr.emit?
+    ))
