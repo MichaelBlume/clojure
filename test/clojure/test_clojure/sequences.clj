@@ -15,6 +15,7 @@
            [java.lang Iterable])
   (:require [clojure.test :refer :all]
             [clojure.test.check :as chk]
+            [clojure.test-clojure.transducers :refer [return-exc]]
             [clojure.test.check.generators :as gen]
             [clojure.test.check.properties :as prop]))
 
@@ -90,13 +91,14 @@
   (filter identity (merge-lists* id-acts transform-acts)))
 
 (defn apply-actions [coll actions]
-  (seq
-    ((->>
-       actions
-       (map :val)
-       reverse
-       (apply comp))
-     (:val coll))))
+  (return-exc
+    (seq
+      ((->>
+         actions
+         (map :val)
+         reverse
+         (apply comp))
+       (:val coll)))))
 
 (defn fmap-multi [f & gens]
   (gen/fmap
