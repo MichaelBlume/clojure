@@ -15,6 +15,7 @@ package clojure.lang;
 import java.io.Serializable;
 import java.util.ArrayList;
 import java.util.Iterator;
+import java.util.List;
 import java.util.concurrent.atomic.AtomicReference;
 
 public class PersistentVector extends APersistentVector implements IObj, IEditableCollection, IReduce{
@@ -90,6 +91,13 @@ static public PersistentVector create(ArrayList list){
     TransientVector ret = EMPTY.asTransient();
     for(int i=0; i<size; i++)
         ret = ret.conj(list.get(i));
+    return ret.persistent();
+}
+
+static public PersistentVector create(List items) {
+    TransientVector ret = EMPTY.asTransient();
+    for (Object item : items)
+        ret = ret.conj(item);
     return ret.persistent();
 }
 
