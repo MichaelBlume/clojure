@@ -614,6 +614,20 @@
       (diff (vals (hash-map :a 1 :b 2)) '(1 2)) nil ))  ; (vals (hash-map :a 1 :b 2)) '(1 2)
 
 
+(defn my-iseq [it]
+  (loop [ret []]
+    (let [result (try (.next it)
+                   (catch Exception e ::fail))]
+      (if (= result ::fail)
+        ret
+        (recur (conj ret result))))))
+
+(deftest test-nil-val
+  (is (= 20 (count
+              (my-iseq(.iterator
+                        (vals (into {} (for [i (range 20)] [i nil])))))))))
+
+
 (deftest test-key
   (are [x]  (= (key (first (hash-map x :value))) x)
       nil
