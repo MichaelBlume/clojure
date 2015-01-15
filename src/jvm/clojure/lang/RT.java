@@ -1655,7 +1655,13 @@ static public Object[] seqToArray(ISeq seq){
     }
 
 static public Object seqToTypedArray(ISeq seq) {
-	Class type = (seq != null) ? seq.first().getClass() : Object.class;
+	Object firstElement = null;
+	for (ISeq s = seq; s != null; s = s.next()) {
+		firstElement = s.first();
+		if (firstElement != null)
+			break;
+	}
+	Class type = (firstElement != null) ? firstElement.getClass() : Object.class;
 	return seqToTypedArray(type, seq);
 }
 
