@@ -69,6 +69,7 @@
    (literal rest)
    (call-last cons :foo)
    (call-last cons :bar)
+   (call-last cons nil)
    (literal reverse)])
 
 (def empties
