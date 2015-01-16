@@ -29,6 +29,11 @@
   ([a b c d] (as-rest-args a b c d))
   ([a b c d e & rst] (apply as-rest-args a b c d e rst)))
 
+(defn map-entry [s]
+  (if (= (count s) 2)
+    (first {(first s) (second s)})
+    s))
+
 (defn iterator [s]
   (iterator-seq
     (.iterator
@@ -61,6 +66,7 @@
    (call-last into [] (map identity))
    (literal iterator)
    (literal array-list)
+   (literal map-entry)
    (call-last apply as-rest-args)
    (call-last apply destructured-args)])
 
