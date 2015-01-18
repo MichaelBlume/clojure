@@ -78,6 +78,7 @@ static final Symbol IDENTITY = Symbol.intern("clojure.core", "identity");
 static final Symbol _AMP_ = Symbol.intern("&");
 static final Symbol ISEQ = Symbol.intern("clojure.lang.ISeq");
 
+static final Keyword loadNs = Keyword.intern(null, "load-ns");
 static final Keyword inlineKey = Keyword.intern(null, "inline");
 static final Keyword inlineAritiesKey = Keyword.intern(null, "inline-arities");
 static final Keyword staticKey = Keyword.intern(null, "static");
@@ -4044,6 +4045,8 @@ static public class ObjExpr implements Expr{
 
 	Object src;
 
+    IPersistentMap opts = PersistentHashMap.EMPTY;
+
 	final static Method voidctor = Method.getMethod("void <init>()");
 	protected IPersistentMap classMeta;
 	protected boolean isStatic;
@@ -4252,6 +4255,22 @@ static public class ObjExpr implements Expr{
 			clinitgen.mark(endLabel);
 			}
         */
+
+        if(isDeftype() && RT.booleanCast(RT.get(opts, loadNs))) {
+            String nsname = demunge(name.substring(0, name.lastIndexOf(".")));
+            if (!nsname.equals("clojure.core")) {
+                clinitgen.push("clojure.core");
+                clinitgen.push("require");
+                clinitgen.invokeStatic(RT_TYPE, Method.getMethod("clojure.lang.Var var(String,String)"));
+                clinitgen.invokeVirtual(VAR_TYPE,Method.getMethod("Object getRawRoot()"));
+                clinitgen.checkCast(IFN_TYPE);
+                clinitgen.push(nsname);
+                clinitgen.invokeStatic(SYMBOL_TYPE, Method.getMethod("clojure.lang.Symbol create(String)"));
+                clinitgen.invokeInterface(IFN_TYPE, Method.getMethod("Object invoke(Object)"));
+                clinitgen.pop();
+            }
+        }
+
 		clinitgen.returnValue();
 
 		clinitgen.endMethod();
@@ -7487,7 +7506,7 @@ static public class NewInstanceExpr extends ObjExpr{
 				}
 
 			ObjExpr ret = build((IPersistentVector)RT.get(opts,implementsKey,PersistentVector.EMPTY),fields,null,tagname, classname,
-			             (Symbol) RT.get(opts,RT.TAG_KEY),rform, frm);
+			             (Symbol) RT.get(opts,RT.TAG_KEY),rform, frm, opts);
 			return ret;
 		}
 	}
@@ -7511,7 +7530,7 @@ static public class NewInstanceExpr extends ObjExpr{
 		rform = RT.next(rform);
 
 
-		ObjExpr ret = build(interfaces, null, null, classname, Symbol.intern(classname), null, rform, frm);
+		ObjExpr ret = build(interfaces, null, null, classname, Symbol.intern(classname), null, rform, frm, null);
 		if(frm instanceof IObj && ((IObj) frm).meta() != null)
 			return new MetaExpr(ret, MapExpr
 					.parse(context == C.EVAL ? context : C.EXPRESSION, ((IObj) frm).meta()));
@@ -7522,7 +7541,7 @@ static public class NewInstanceExpr extends ObjExpr{
 
 	static ObjExpr build(IPersistentVector interfaceSyms, IPersistentVector fieldSyms, Symbol thisSym,
 	                     String tagName, Symbol className,
-	                  Symbol typeTag, ISeq methodForms, Object frm) {
+	                  Symbol typeTag, ISeq methodForms, Object frm, IPersistentMap opts) {
 		NewInstanceExpr ret = new NewInstanceExpr(null);
 
 		ret.src = frm;
@@ -7530,6 +7549,7 @@ static public class NewInstanceExpr extends ObjExpr{
 		ret.classMeta = RT.meta(className);
 		ret.internalName = ret.name.replace('.', '/');
 		ret.objtype = Type.getObjectType(ret.internalName);
+		ret.opts = opts;
 
 		if(thisSym != null)
 			ret.thisName = thisSym.name;

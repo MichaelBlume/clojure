@@ -63,7 +63,7 @@
         methods (map (fn [[name params & body]]
                        (cons name (maybe-destructured params body)))
                      (apply concat (vals impls)))]
-    (when-let [bad-opts (seq (remove #{:no-print} (keys opts)))]
+    (when-let [bad-opts (seq (remove #{:no-print :load-ns} (keys opts)))]
       (throw (IllegalArgumentException. (apply print-str "Unsupported option(s) -" bad-opts))))
     [interfaces methods opts]))
 
@@ -148,7 +148,7 @@
 (defn- emit-defrecord 
   "Do not use this directly - use defrecord"
   {:added "1.2"}
-  [tagname name fields interfaces methods]
+  [tagname name fields interfaces methods opts]
   (let [classname (with-meta (symbol (str (namespace-munge *ns*) "." name)) (meta name))
         interfaces (vec interfaces)
         interface-set (set (map resolve interfaces))
@@ -244,6 +244,7 @@
      (let [[i m] (-> [interfaces methods] irecord eqhash iobj ilookup imap ijavamap)]
        `(deftype* ~tagname ~classname ~(conj hinted-fields '__meta '__extmap) 
           :implements ~(vec i) 
+          ~@(mapcat identity opts)
           ~@m))))))
 
 (defn- build-positional-factory
@@ -371,7 +372,7 @@
     `(let []
        (declare ~(symbol (str  '-> gname)))
        (declare ~(symbol (str 'map-> gname)))
-       ~(emit-defrecord name gname (vec hinted-fields) (vec interfaces) methods)
+       ~(emit-defrecord name gname (vec hinted-fields) (vec interfaces) methods opts)
        (import ~classname)
        ~(build-positional-factory gname classname fields)
        (defn ~(symbol (str 'map-> gname))
@@ -389,11 +390,12 @@
 
 (defn- emit-deftype*
   "Do not use this directly - use deftype"
-  [tagname name fields interfaces methods]
+  [tagname name fields interfaces methods opts]
   (let [classname (with-meta (symbol (str (namespace-munge *ns*) "." name)) (meta name))
         interfaces (conj interfaces 'clojure.lang.IType)]
     `(deftype* ~tagname ~classname ~fields 
        :implements ~interfaces 
+       ~@(mapcat identity opts)
        ~@methods)))
 
 (defmacro deftype
@@ -470,7 +472,7 @@
         fields (vec (map #(with-meta % nil) fields))
         [field-args over] (split-at 20 fields)]
     `(let []
-       ~(emit-deftype* name gname (vec hinted-fields) (vec interfaces) methods)
+       ~(emit-deftype* name gname (vec hinted-fields) (vec interfaces) methods opts)
        (import ~classname)
        ~(build-positional-factory gname classname fields)
        ~classname)))

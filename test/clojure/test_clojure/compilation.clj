@@ -264,3 +264,10 @@
   (is (= clojure.test_clojure.compilation.examples.T
          (class (clojure.test_clojure.compilation.examples.T.))
          (class (clojure.test-clojure.compilation.examples/->T)))))
+
+(deftest clj-1208
+  ;; clojure.test-clojure.compilation.load-ns has not been loaded
+  ;; so this would fail if the deftype didn't load it in its static
+  ;; initializer as the implementation of f requires a var from
+  ;; that namespace
+  (is (= 1 (.f (clojure.test_clojure.compilation.load_ns.x.)))))
