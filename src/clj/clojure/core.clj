@@ -2681,8 +2681,9 @@
               size (count c)
               b (chunk-buffer size)]
           (dotimes [i size]
-              (when (pred (.nth c i))
-                (chunk-append b (.nth c i))))
+              (let [v (.nth c i)]
+                (when (pred v)
+                  (chunk-append b v))))
           (chunk-cons (chunk b) (filter pred (chunk-rest s))))
         (let [f (first s) r (rest s)]
           (if (pred f)
