@@ -2989,8 +2989,8 @@
   {:added "1.0"
    :static true}
   ([coll]
-   (when (seq coll)
-     (recur (next coll))))
+   (when-let [s (seq coll)]
+     (recur (next s))))
   ([n coll]
    (when (and (seq coll) (pos? n))
      (recur (dec n) (next coll)))))
@@ -3027,7 +3027,7 @@
    :static true}
   [coll n]
     (loop [n n xs coll]
-      (if (and (pos? n) (seq xs))
+      (if-let [xs (and (pos? n) (seq xs))]
         (recur (dec n) (rest xs))
         xs)))
 
