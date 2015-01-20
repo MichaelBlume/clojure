@@ -18,6 +18,10 @@ import java.util.Iterator;
 public class PersistentUnrolledVector {
     public static IPersistentVector EMPTY = new Card0();
 
+	public static ITransientVector emptyTransient() {
+		return (ITransientVector) ((IEditableCollection) EMPTY).asTransient();
+	}
+
     public static IPersistentVector create() {
 	return EMPTY;
     }

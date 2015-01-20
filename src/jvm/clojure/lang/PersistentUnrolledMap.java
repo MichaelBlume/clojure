@@ -18,6 +18,10 @@ import java.util.Map;
 
 public class PersistentUnrolledMap {
     public static IPersistentMap EMPTY = new Card0();
+
+	public static ITransientMap emptyTransient() {
+		return ((IEditableMap) EMPTY).asTransient();
+	}
     static Object NOT_FOUND = new Object();
 
     public static IPersistentMap create() {
