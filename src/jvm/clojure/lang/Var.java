@@ -45,14 +45,14 @@ static public class Unbound extends AFn{
 }
 
 static class Frame{
-	final static Frame TOP = new Frame(PersistentUnrolledMap.EMPTY, null);
+	final static Frame TOP = new Frame((IEditableMap) PersistentUnrolledMap.EMPTY, null);
 	//Var->TBox
-	Associative bindings;
+	IEditableMap bindings;
 	//Var->val
 //	Associative frameBindings;
 	Frame prev;
 
-	public Frame(Associative bindings, Frame prev){
+	public Frame(IEditableMap bindings, Frame prev){
 //		this.frameBindings = frameBindings;
 		this.bindings = bindings;
 		this.prev = prev;
@@ -311,7 +311,7 @@ synchronized public Object alterRoot(IFn fn, ISeq args) {
 
 public static void pushThreadBindings(Associative bindings){
 	Frame f = dvals.get();
-	Associative bmap = f.bindings;
+	ITransientMap bmap = f.bindings.asTransient();
 	for(ISeq bs = bindings.seq(); bs != null; bs = bs.next())
 		{
 		IMapEntry e = (IMapEntry) bs.first();
@@ -322,7 +322,7 @@ public static void pushThreadBindings(Associative bindings){
 		v.threadBound.set(true);
 		bmap = bmap.assoc(v, new TBox(Thread.currentThread(), e.val()));
 		}
-	dvals.set(new Frame(bmap, f));
+	dvals.set(new Frame((IEditableMap) bmap.persistent(), f));
 }
 
 public static void popThreadBindings(){
@@ -338,7 +338,7 @@ public static void popThreadBindings(){
 
 public static Associative getThreadBindings(){
 	Frame f = dvals.get();
-	IPersistentMap ret = PersistentUnrolledMap.EMPTY;
+	ITransientMap ret = PersistentUnrolledMap.emptyTransient();
 	for(ISeq bs = f.bindings.seq(); bs != null; bs = bs.next())
 		{
 		IMapEntry e = (IMapEntry) bs.first();
@@ -346,7 +346,7 @@ public static Associative getThreadBindings(){
 		TBox b = (TBox) e.val();
 		ret = ret.assoc(v, b.val);
 		}
-	return ret;
+	return ret.persistent();
 }
 
 public final TBox getThreadBinding(){
