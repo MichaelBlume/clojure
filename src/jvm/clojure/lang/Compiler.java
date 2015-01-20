@@ -256,7 +256,7 @@ static public Object getCompilerOption(Keyword k){
 
     static
     {
-        Object compilerOptions = null;
+        ITransientMap compilerOptions = PersistentUnrolledMap.emptyTransient();
 
         for (Map.Entry e : System.getProperties().entrySet())
         {
@@ -264,14 +264,14 @@ static public Object getCompilerOption(Keyword k){
             String v = (String) e.getValue();
             if (name.startsWith("clojure.compiler."))
             {
-                compilerOptions = RT.assoc(compilerOptions,
+                compilerOptions = compilerOptions.assoc(
                         RT.keyword(null, name.substring(1 + name.lastIndexOf('.'))),
                         RT.readString(v));
             }
         }
 
         COMPILER_OPTIONS = Var.intern(Namespace.findOrCreate(Symbol.intern("clojure.core")),
-                Symbol.intern("*compiler-options*"), compilerOptions).setDynamic();
+                Symbol.intern("*compiler-options*"), compilerOptions.persistent()).setDynamic();
     }
 
     static Object elideMeta(Object m){
@@ -3056,7 +3056,7 @@ public static class MapExpr implements Expr{
 
 
 	static public Expr parse(C context, IPersistentMap form) {
-		IPersistentVector keyvals = PersistentUnrolledVector.EMPTY;
+		ITransientVector tkeyvals = PersistentUnrolledVector.emptyTransient();
 		boolean keysConstant = true;
 		boolean valsConstant = true;
 		boolean allConstantKeysUnique = true;
@@ -3066,8 +3066,8 @@ public static class MapExpr implements Expr{
 			IMapEntry e = (IMapEntry) s.first();
 			Expr k = analyze(context == C.EVAL ? context : C.EXPRESSION, e.key());
 			Expr v = analyze(context == C.EVAL ? context : C.EXPRESSION, e.val());
-			keyvals = (IPersistentVector) keyvals.cons(k);
-			keyvals = (IPersistentVector) keyvals.cons(v);
+			tkeyvals = (ITransientVector) tkeyvals.conj(k);
+			tkeyvals = (ITransientVector) tkeyvals.conj(v);
 			if(k instanceof LiteralExpr)
 				{
 				Object kval = k.eval();
@@ -3082,6 +3082,7 @@ public static class MapExpr implements Expr{
 				valsConstant = false;
 			}
 
+		IPersistentVector keyvals = (IPersistentVector) tkeyvals.persistent();
 		Expr ret = new MapExpr(keyvals);
 		if(form instanceof IObj && ((IObj) form).meta() != null)
 			return new MetaExpr(ret, MapExpr
@@ -3093,13 +3094,13 @@ public static class MapExpr implements Expr{
 				throw new IllegalArgumentException("Duplicate constant keys in map");
 			if(valsConstant)
 				{
-				IPersistentMap m = PersistentUnrolledMap.EMPTY;
+				ITransientMap m = PersistentUnrolledMap.emptyTransient();
 				for(int i=0;i<keyvals.length();i+= 2)
 					{
 					m = m.assoc(((LiteralExpr)keyvals.nth(i)).val(), ((LiteralExpr)keyvals.nth(i+1)).val());
 					}
 //				System.err.println("Constant: " + m);
-				return new ConstantExpr(m);
+				return new ConstantExpr(m.persistent());
 				}
 			else
 				return ret;
@@ -7533,13 +7534,14 @@ static public class NewInstanceExpr extends ObjExpr{
 			rform = rform.next();
 			IPersistentVector fields = (IPersistentVector) rform.first();
 			rform = rform.next();
-			IPersistentMap opts = PersistentUnrolledMap.EMPTY;
+			ITransientMap o = PersistentUnrolledMap.emptyTransient();
 			while(rform != null && rform.first() instanceof Keyword)
 				{
-				opts = opts.assoc(rform.first(), RT.second(rform));
+				o = o.assoc(rform.first(), RT.second(rform));
 				rform = rform.next().next();
 				}
 
+			IPersistentMap opts = o.persistent();
 			ObjExpr ret = build((IPersistentVector)RT.get(opts,implementsKey,PersistentUnrolledVector.EMPTY),fields,null,tagname, classname,
 			             (Symbol) RT.get(opts,RT.TAG_KEY),rform, frm, opts);
 			return ret;
@@ -7591,7 +7593,7 @@ static public class NewInstanceExpr extends ObjExpr{
 
 		if(fieldSyms != null)
 			{
-			IPersistentMap fmap = PersistentUnrolledMap.EMPTY;
+			ITransientMap fmap = PersistentUnrolledMap.emptyTransient();
 			Object[] closesvec = new Object[2 * fieldSyms.count()];
 			for(int i=0;i<fieldSyms.count();i++)
 				{
@@ -7606,7 +7608,7 @@ static public class NewInstanceExpr extends ObjExpr{
 			//todo - inject __meta et al into closes - when?
 			//use array map to preserve ctor order
 			ret.closes = new PersistentArrayMap(closesvec);
-			ret.fields = fmap;
+			ret.fields = fmap.persistent();
 			for(int i=fieldSyms.count()-1;i >= 0 && (((Symbol)fieldSyms.nth(i)).name.equals("__meta") || ((Symbol)fieldSyms.nth(i)).name.equals("__extmap"));--i)
 				ret.altCtorDrops++;
 			}
@@ -8037,7 +8039,7 @@ public static class NewInstanceMethod extends ObjMethod{
 			else
 				getAndIncLocalNum();
 
-			IPersistentVector argLocals = PersistentUnrolledVector.EMPTY;
+			ITransientVector argLocals = PersistentUnrolledVector.emptyTransient();
 			method.retClass = tagClass(tagOf(name));
 			method.argTypes = new Type[parms.count()];
 			boolean hinted = tagOf(name) != null;
@@ -8119,11 +8121,12 @@ public static class NewInstanceMethod extends ObjMethod{
 				if(pclasses[i] == long.class || pclasses[i] == double.class)
 					getAndIncLocalNum();
 				}
-			LOOP_LOCALS.set(argLocals);
+			IPersistentVector pArgLocals = (IPersistentVector) argLocals.persistent();
+			LOOP_LOCALS.set(pArgLocals);
 			method.name = name.name;
 			method.methodMeta = RT.meta(name);
 			method.parms = parms;
-			method.argLocals = argLocals;
+			method.argLocals = pArgLocals;
 			method.body = (new BodyExpr.Parser()).parse(C.RETURN, body);
 			return method;
 			}
