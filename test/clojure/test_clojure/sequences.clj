@@ -64,6 +64,7 @@
    (call-last apply vector)
    (call-last into [] identity)
    (call-last into [] (map identity))
+   (call-last sequence (map identity))
    (literal iterator)
    (literal array-list)
    (literal map-entry)
