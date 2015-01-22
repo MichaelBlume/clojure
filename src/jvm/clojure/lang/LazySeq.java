@@ -189,8 +189,14 @@ public Iterator iterator(){
 }
 
 //////////// List stuff /////////////////
+
+private transient List _reified = null;
+
 private List reify(){
-	return new ArrayList(this);
+	if (_reified == null) {
+		_reified = new ArrayList(this);
+	}
+	return _reified;
 }
 
 public List subList(int fromIndex, int toIndex){
