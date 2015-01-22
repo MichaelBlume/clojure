@@ -4088,7 +4088,7 @@ static public class ObjExpr implements Expr{
 
 	Object src;
 
-    IPersistentMap opts = PersistentHashMap.EMPTY;
+    IPersistentMap opts = PersistentUnrolledMap.EMPTY;
 
 	final static Method voidctor = Method.getMethod("void <init>()");
 	protected IPersistentMap classMeta;
