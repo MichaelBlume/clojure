@@ -162,7 +162,7 @@ static public Object read(PushbackReader r, IPersistentMap opts){
 
 static public Object read(PushbackReader r, boolean eofIsError, Object eofValue, boolean isRecursive)
 {
-    return read(r, eofIsError, eofValue, isRecursive, PersistentHashMap.EMPTY);
+    return read(r, eofIsError, eofValue, isRecursive, PersistentUnrolledMap.EMPTY);
 }
 
 static public Object read(PushbackReader r, boolean eofIsError, Object eofValue, boolean isRecursive, Object opts)
