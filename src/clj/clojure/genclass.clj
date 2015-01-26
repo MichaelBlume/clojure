@@ -67,7 +67,7 @@
 
 (defn- overload-name [mname pclasses]
   (if (seq pclasses)
-    (apply str mname (interleave (repeat \-) 
+    (apply str mname (interleave (repeat1 \-)
                                  (map escape-class-name pclasses)))
     (str mname "-void")))
 

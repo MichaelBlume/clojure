@@ -2834,14 +2834,6 @@
                       s)))]
        (lazy-seq (step pred coll)))))
 
-(defn cycle
-  "Returns a lazy (infinite!) sequence of repetitions of the items in coll."
-  {:added "1.0"
-   :static true}
-  [coll] (lazy-seq 
-          (when-let [s (seq coll)] 
-              (concat s (cycle s)))))
-
 (defn split-at
   "Returns a vector of [(take n coll) (drop n coll)]"
   {:added "1.0"
@@ -2856,25 +2848,16 @@
   [pred coll]
     [(take-while pred coll) (drop-while pred coll)])
 
-(defn repeat
-  "Returns a lazy (infinite!, or length n if supplied) sequence of xs."
-  {:added "1.0"
-   :static true}
-  ([x] (lazy-seq (cons x (repeat x))))
-  ([n x] (take n (repeat x))))
+(defn ^:private ^:static repeat1
+  ([x] (lazy-seq (cons x (repeat1 x))))
+  ([n x] (take n (repeat1 x))))
 
 (defn replicate
   "DEPRECATED: Use 'repeat' instead.
    Returns a lazy seq of n xs."
   {:added "1.0"
    :deprecated "1.3"}
-  [n x] (take n (repeat x)))
-
-(defn iterate
-  "Returns a lazy sequence of x, (f x), (f (f x)) etc. f must be free of side-effects"
-  {:added "1.0"
-   :static true}
-  [f x] (cons x (lazy-seq (iterate f (f x)))))
+  [n x] (take n (repeat1 x)))
 
 (defn range
   "Returns a lazy seq of nums from start (inclusive) to end
@@ -4168,7 +4151,7 @@
      (vector? name-vals-vec) "a vector for its binding"
      (even? (count name-vals-vec)) "an even number of forms in binding vector")
   `(let [~@(interleave (take-nth 2 name-vals-vec)
-                       (repeat '(.. clojure.lang.Var create setDynamic)))]
+                       (repeat1 '(.. clojure.lang.Var create setDynamic)))]
      (. clojure.lang.Var (pushThreadBindings (hash-map ~@name-vals-vec)))
      (try
       ~@body
@@ -4968,7 +4951,7 @@
               (vreset! started true)
               (rf result input))))))))
   ([sep coll]
-   (drop 1 (interleave (repeat sep) coll))))
+   (drop 1 (interleave (repeat1 sep) coll))))
 
 (defmacro definline
   "Experimental - like defmacro, except defines a named function whose
@@ -5704,7 +5687,7 @@
   forwarding to load-lib"
   [& args]
   (let [flags (filter keyword? args)
-        opts (interleave flags (repeat true))
+        opts (interleave flags (repeat1 true))
         args (filter (complement keyword?) args)]
     ; check for unsupported options
     (let [supported #{:as :reload :reload-all :require :use :verbose :refer}
@@ -6476,6 +6459,148 @@
 (load "gvec")
 (load "instant")
 (load "uuid")
+
+(declare iterate)
+
+(deftype Iterate [f x]
+  clojure.lang.Seqable
+  (seq [_]
+    (cons x (lazy-seq (iterate f (f x)))))
+
+  clojure.lang.IReduceInit
+  (reduce [_ rf init]
+    (loop [ret init
+           v x]
+      (let [r (rf ret v)]
+        (if (reduced? r)
+          @r
+          (recur r (f v))))))
+
+  clojure.lang.Sequential)
+
+(defn iterate
+  "Returns a lazy sequence of x, (f x), (f (f x)) etc. f must be free of side-effects"
+  {:added "1.0"
+   :static true}
+  [f x] (->Iterate f x))
+
+(defmethod print-method Iterate
+  [iter ^Writer w]
+  (print-method (seq iter) w))
+
+(ns-unmap 'clojure.core '->Iterate)
+
+
+(defn- cycle-seq
+  [coll] (lazy-seq
+           (when-let [s (seq coll)]
+             (concat s (cycle-seq s)))))
+
+(deftype Cycle [coll]
+  clojure.lang.Seqable
+  (seq [_] (cycle-seq coll))
+
+  clojure.lang.IReduceInit
+  (reduce [_ rf init]
+    (loop [ret init
+           s coll]
+      (let [rr (rf ret (first s))]
+        (if (reduced? rr)
+          @rr
+          (recur rr (or (next s) coll))))))
+
+  clojure.lang.Sequential)
+
+(defn cycle
+  "Returns a lazy (infinite!) sequence of repetitions of the items in coll."
+  {:added "1.0"
+   :static true}
+  [coll] (if-let [c (seq coll)]
+           (->Cycle c)
+           ()))
+
+(defmethod print-method Cycle
+  [c ^Writer w]
+  (print-method (seq c) w))
+
+(ns-unmap 'clojure.core '->Cycle)
+
+
+(deftype InfiniteRepeat [x]
+  clojure.lang.Seqable
+  (seq [_] (repeat1 x))
+
+  clojure.lang.IReduceInit
+  (reduce [_ f init]
+    (loop [ret init]
+      (let [ret (f ret x)]
+        (if (reduced? ret)
+          @ret
+          (recur ret)))))
+
+  clojure.lang.Sequential)
+
+(deftype FiniteRepeat [^long n x]
+  clojure.lang.Seqable
+  (seq [_] (repeat1 n x))
+
+  clojure.lang.IReduce
+  (reduce [_ f init]
+    (loop [ret init
+           i n]
+      (if (pos? i)
+        (let [ret (f ret x)]
+          (if (reduced? ret)
+            @ret
+            (recur ret (unchecked-dec i))))
+        ret)))
+  (reduce [_ f]
+    (loop [ret x
+           i (dec n)]
+      (if (pos? i)
+        (let [ret (f ret x)]
+          (if (reduced? ret)
+            @ret
+            (recur ret (unchecked-dec i))))
+        ret)))
+
+  clojure.lang.Counted
+  (count [_] n)
+
+  clojure.lang.IHashEq
+  (hasheq [this] (hash (seq this)))
+
+  java.lang.Object
+  (hashCode [this] (.hashCode (seq this)))
+  (equals [this o] (.equals (seq this) o))
+
+  clojure.lang.Sequential)
+
+(defn repeat
+  "Returns a lazy (infinite!, or length n if supplied) sequence of xs."
+  {:added "1.0"
+   :static true}
+  ([x] (->InfiniteRepeat x))
+  ([n x] (if (pos? n)
+           (->FiniteRepeat n x)
+           ())))
+
+(defmethod print-method InfiniteRepeat
+  [r ^Writer w]
+  (print-method (seq r) w))
+
+(ns-unmap 'clojure.core '->InfiniteRepeat)
+
+(defmethod print-method FiniteRepeat
+  [r ^Writer w]
+  (print-method (seq r) w))
+
+(defmethod print-dup FiniteRepeat
+  [r w]
+  (print-dup (seq r) w))
+
+(ns-unmap 'clojure.core '->FiniteRepeat)
+
 
 (defn reduce
   "f should be a function of 2 arguments. If val is not supplied,
