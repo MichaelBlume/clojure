@@ -621,3 +621,41 @@
   [^{:tag cgen/dup-readable} o]
   (when-not (= o %)
     (throw (ex-info "Value cannot roundtrip, see ex-data" {:printed o :read %}))))
+
+(defn read-str-opts
+  "Helper function to read a string, with an options map"
+  [opts s]
+  (read opts (java.io.PushbackReader. (java.io.StringReader. s))))
+
+(deftest read-cond
+  (testing "preserve-read-cond"
+    (is (= '(clojure.core/read-cond :foo :bar)
+           (read-str-opts {:preserve-read-cond true} "(#? :foo :bar)")))
+    (is (= '(clojure.core/read-cond-splicing :foo [:bar :baz])
+           (read-str-opts {:preserve-read-cond true} "(#?@ :foo [:bar :baz])")))
+    (is (= '(clojure.core/read-cond :foo :bar)
+           (read-str-opts {:preserve-read-cond true} "(clojure.core/read-cond :foo :bar)"))))
+  (testing "basic read-cond"
+    (is (= '[foo-form]
+           (read-str-opts {:features #{:foo}} "[(#? :foo foo-form :bar bar-form)]")))
+    (is (= '[bar-form]
+           (read-str-opts {:features #{:bar}} "[(#? :foo foo-form :bar bar-form)]")))
+    (is (= '[foo-form]
+           (read-str-opts {:features #{:foo :bar}} "[(#? :foo foo-form :bar bar-form)]")))
+    (is (= '[]
+           (read-str-opts {:features #{:baz}} "[(#? :foo foo-form :bar bar-form)]"))))
+  (testing "default-features"
+    (is (= "clojure" (#? :clj "clojure" :cljs "clojurescript"))))
+  (testing "else-features"
+    (is (= "clojure" (#? :clj "clojure" :default "default")))
+    (is (= "default" (#? :foo "foobar" :default "default")))
+    (is (= "default" (#? :foo "foobar" :else "default")))
+    (is (= "default" (#? :foo "foobar" :none "default"))))
+  (testing "read-cond-splicing"
+    (is (= [] [(#?@ :clj [])]))
+    (is (= [:a] [(#?@ :clj [:a])]))
+    (is (= [:a :b] [(#?@ :clj [:a :b])]))
+    (is (= [:a :b :c] [(#?@ :clj [:a :b :c])])))
+
+
+  )
