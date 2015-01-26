@@ -36,9 +36,9 @@ public MultiFn(String name, IFn dispatchFn, Object defaultDispatchVal, IRef hier
 	this.name = name;
 	this.dispatchFn = dispatchFn;
 	this.defaultDispatchVal = defaultDispatchVal;
-	this.methodTable = PersistentHashMap.EMPTY;
+	this.methodTable = PersistentUnrolledMap.EMPTY;
 	this.methodCache = getMethodTable();
-	this.preferTable = PersistentHashMap.EMPTY;
+	this.preferTable = PersistentUnrolledMap.EMPTY;
     this.hierarchy = hierarchy;
 	cachedHierarchy = null;
 }
@@ -46,7 +46,7 @@ public MultiFn(String name, IFn dispatchFn, Object defaultDispatchVal, IRef hier
 public MultiFn reset(){
 	rw.writeLock().lock();
 	try{
-		methodTable = methodCache = preferTable = PersistentHashMap.EMPTY;
+		methodTable = methodCache = preferTable = PersistentUnrolledMap.EMPTY;
 		cachedHierarchy = null;
 		return this;
 	}

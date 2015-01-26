@@ -16,7 +16,7 @@ import java.util.Map;
 
 public abstract class ARef extends AReference implements IRef{
 protected volatile IFn validator = null;
-private volatile IPersistentMap watches = PersistentHashMap.EMPTY;
+private volatile IPersistentMap watches = PersistentUnrolledMap.EMPTY;
 
 public ARef(){
 	super();

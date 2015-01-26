@@ -29,12 +29,12 @@ final public static PersistentQueue EMPTY = new PersistentQueue(null, 0, null, n
 //*
 final int cnt;
 final ISeq f;
-final PersistentVector r;
+final IPersistentVector r;
 //static final int INITIAL_REAR_SIZE = 4;
 int _hash = -1;
 int _hasheq = -1;
 
-public PersistentQueue(IPersistentMap meta, int cnt, ISeq f, PersistentVector r){
+public PersistentQueue(IPersistentMap meta, int cnt, ISeq f, IPersistentVector r){
     super(meta);
     this.cnt = cnt;
     this.f = f;
@@ -105,7 +105,7 @@ public PersistentQueue pop(){
 		return this;
 	//throw new IllegalStateException("popping empty queue");
 	ISeq f1 = f.next();
-	PersistentVector r1 = r;
+	IPersistentVector r1 = r;
 	if(f1 == null)
 		{
 		f1 = RT.seq(r);
@@ -128,7 +128,7 @@ public PersistentQueue cons(Object o){
 	if(f == null)     //empty
 		return new PersistentQueue(meta(), cnt + 1, RT.list(o), null);
 	else
-		return new PersistentQueue(meta(), cnt + 1, f, (r != null ? r : PersistentVector.EMPTY).cons(o));
+		return new PersistentQueue(meta(), cnt + 1, f, (r != null ? r : PersistentUnrolledVector.EMPTY).cons(o));
 }
 
 public IPersistentCollection empty(){
@@ -243,7 +243,7 @@ public boolean contains(Object o){
 public Iterator iterator(){
     return new Iterator(){
         private ISeq fseq = f;
-        private final Iterator riter = r != null ? r.iterator() : null;
+        private final Iterator riter = r != null ? ((Iterable) r).iterator() : null;
 
         public boolean hasNext(){
             return ((fseq != null && fseq.seq() != null) || (riter != null && riter.hasNext()));

@@ -51,7 +51,7 @@ static public Def createSlotMap(ISeq keys){
 
 static public PersistentStructMap create(Def def, ISeq keyvals){
 	Object[] vals = new Object[def.keyslots.count()];
-	IPersistentMap ext = PersistentHashMap.EMPTY;
+	ITransientMap ext = PersistentUnrolledMap.emptyTransient();
 	for(; keyvals != null; keyvals = keyvals.next().next())
 		{
 		if(keyvals.next() == null)
@@ -64,12 +64,12 @@ static public PersistentStructMap create(Def def, ISeq keyvals){
 		else
 			ext = ext.assoc(k, v);
 		}
-	return new PersistentStructMap(null, def, vals, ext);
+	return new PersistentStructMap(null, def, vals, ext.persistent());
 }
 
 static public PersistentStructMap construct(Def def, ISeq valseq){
 	Object[] vals = new Object[def.keyslots.count()];
-	IPersistentMap ext = PersistentHashMap.EMPTY;
+	IPersistentMap ext = PersistentUnrolledMap.EMPTY;
 	for(int i = 0; i < vals.length && valseq != null; valseq = valseq.next(), i++)
 		{
 		vals[i] = valseq.first();

@@ -42,7 +42,7 @@ public TransactionalHashMap() {
 public TransactionalHashMap(int nBins) {
 	bins = new Ref[nBins];
 	for(int i = 0; i < nBins; i++)
-		bins[i] = new Ref(PersistentHashMap.EMPTY);
+		bins[i] = new Ref(PersistentUnrolledMap.EMPTY);
 }
 
 public TransactionalHashMap(Map<? extends K, ? extends V> m) {
@@ -105,7 +105,7 @@ public void clear(){
 		IPersistentMap map = (IPersistentMap) r.deref();
 		if(map.count() > 0)
 			{
-			r.set(PersistentHashMap.EMPTY);
+			r.set(PersistentUnrolledMap.EMPTY);
 			}
 		}
 }

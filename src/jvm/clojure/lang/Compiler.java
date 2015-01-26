@@ -2844,7 +2844,7 @@ static final public Pattern DEMUNGE_PATTERN;
 static {
 	// DEMUNGE_MAP maps strings to characters in the opposite
 	// direction that CHAR_MAP does, plus it maps "$" to '/'
-	ITransientMap m = PersistentHashMap.EMPTY.asTransient();
+	ITransientMap m = PersistentUnrolledMap.emptyTransient();
 	m = m.assoc("$", '/');
 	for(ISeq s = RT.seq(CHAR_MAP); s != null; s = s.next())
 		{
