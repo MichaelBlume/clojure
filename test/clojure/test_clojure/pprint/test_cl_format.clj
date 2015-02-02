@@ -819,7 +819,7 @@ but it was called with an argument of type short-float.\n")
   "
 |      :a | :e |    :d |             :c |
 |---------+----+-------+----------------|
-| 5.47E18 |    |       | [\"hi\" \"there\"] |
-|    -2/3 |    | panda |            dog |
+| 5.47E18 | nil |   nil | [\"hi\" \"there\"] |
+|    -2/3 | nil | panda |          \"dog\" |
 "
   )

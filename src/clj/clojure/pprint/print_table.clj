@@ -19,13 +19,13 @@
                      (fn [k]
                        (apply max (count (str k)) (map #(count (str (get % k))) rows)))
                      ks)
-             spacers (map #(apply str (repeat % "-")) widths)
+             spacers (map #(symbol (apply str (repeat % "-"))) widths)
              fmts (map #(str "%" % "s") widths)
              fmt-row (fn [leader divider trailer row]
                        (str leader
                             (apply str (interpose divider
                                                   (for [[col fmt] (map vector (map #(get row %) ks) fmts)]
-                                                    (format fmt (str col)))))
+                                                    (format fmt (pr-str col)))))
                             trailer))]
          (println)
          (println (fmt-row "| " " | " " |" (zipmap ks ks)))
