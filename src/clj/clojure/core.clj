@@ -704,6 +704,30 @@
        (cat (concat x y) zs))))
 
 ;;;;;;;;;;;;;;;;at this point all the support for syntax-quote exists;;;;;;;;;;;;;;;;;;;;;;
+(defmacro ^{:private true} assoc* [m & args]
+  (if (seq args)
+    `(assoc* (. clojure.lang.RT (assoc ~m ~(first args) ~(second args))) ~@(nnext args))
+    m))
+
+(defn assoc
+  ([m k v] (assoc* m k v))
+  ([m k1 v1 k2 v2] (assoc* m k1 v1 k2 v2))
+  ([m k1 v1 k2 v2 k3 v3] (assoc* m k1 v1 k2 v2 k3 v3))
+  ([m k1 v1 k2 v2 k3 v3 k4 v4] (assoc* m k1 v1 k2 v2 k3 v3 k4 v4))
+  ([m k1 v1 k2 v2 k3 v3 k4 v4 k5 v5]
+   (assoc* m k1 v1 k2 v2 k3 v3 k4 v4 k5 v5))
+  ([m k1 v1 k2 v2 k3 v3 k4 v4 k5 v5 k6 v6]
+   (assoc* m k1 v1 k2 v2 k3 v3 k4 v4 k5 v5 k6 v6))
+  ([m k1 v1 k2 v2 k3 v3 k4 v4 k5 v5 k6 v6 & kvs]
+   (loop [ret (assoc* m k1 v1 k2 v2 k3 v3 k4 v4 k5 v5 k6 v6)
+          kvs kvs]
+     (if kvs
+       (if (next kvs)
+         (recur (assoc* ret (first kvs) (second kvs)) (nnext kvs))
+         (throw (IllegalArgumentException.
+                 "assoc expects even number of arguments after map/vector, found odd number")))
+       ret))))
+
 (defmacro delay
   "Takes a body of expressions and yields a Delay object that will
   invoke the body only the first time it is forced (with force or deref/@), and
@@ -3227,17 +3251,31 @@
   ([^clojure.lang.ITransientCollection coll x]
      (.conj coll x)))
 
+(defmacro ^{:private true} assoc!* [coll & kvs]
+  (if kvs
+    `(let [^clojure.lang.ITransientAssociative coll# ~coll]
+       (assoc!* (.assoc coll# ~@(take 2 kvs)) ~@(nnext kvs)))
+    coll))
+
 (defn assoc!
   "When applied to a transient map, adds mapping of key(s) to
   val(s). When applied to a transient vector, sets the val at index.
   Note - index must be <= (count vector). Returns coll."
   {:added "1.1"
    :static true}
-  ([^clojure.lang.ITransientAssociative coll key val] (.assoc coll key val))
-  ([^clojure.lang.ITransientAssociative coll key val & kvs]
-   (let [ret (.assoc coll key val)]
+  ([coll k v] (assoc!* coll k v))
+  ([coll k1 v1 k2 v2] (assoc!* coll k1 v1 k2 v2))
+  ([coll k1 v1 k2 v2 k3 v3] (assoc!* coll k1 v1 k2 v2 k3 v3))
+  ([coll k1 v1 k2 v2 k3 v3 k4 v4] (assoc!* coll k1 v1 k2 v2 k3 v3 k4 v4))
+  ([coll k1 v1 k2 v2 k3 v3 k4 v4 k5 v5]
+   (assoc!* coll k1 v1 k2 v2 k3 v3 k4 v4 k5 v5))
+  ([coll k1 v1 k2 v2 k3 v3 k4 v4 k5 v5 k6 v6]
+   (assoc!* coll k1 v1 k2 v2 k3 v3 k4 v4 k5 v5 k6 v6))
+  ([coll k1 v1 k2 v2 k3 v3 k4 v4 k5 v5 k6 v6 & kvs]
+   (loop [ret (assoc! coll k1 v1 k2 v2 k3 v3 k4 v4 k5 v5 k6 v6)
+          kvs kvs]
      (if kvs
-       (recur ret (first kvs) (second kvs) (nnext kvs))
+       (recur (assoc!* ret (first kvs) (second kvs)) (nnext kvs))
        ret))))
 
 (defn dissoc!
