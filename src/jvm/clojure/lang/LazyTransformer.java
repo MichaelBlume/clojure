@@ -92,8 +92,7 @@ static interface IStepper{
 	void step(LazyTransformer lt);
 }
 
-static class Stepper implements IStepper{
-	Iterator iter;
+static abstract class AStepper implements IStepper{
 	IFn xform;
 	static IFn stepfn = new AFn(){
 		public Object invoke(Object result){
@@ -110,14 +109,12 @@ static class Stepper implements IStepper{
 			}
 		};
 
-	Stepper(IFn xform, Iterator iter){
-		this.iter = iter;
-		this.xform = (IFn) xform.invoke(stepfn);
-		}
+	abstract Object next();
+	abstract boolean hasNext();
 
 	public void step(LazyTransformer lt){
-		while(lt.stepper != null && iter.hasNext()){
-			if(RT.isReduced(xform.invoke(lt, iter.next()))){
+		while(lt.stepper != null && hasNext()){
+			if(RT.isReduced(xform.invoke(lt, next()))){
 				lt.stepper = null;
 				LazyTransformer et = lt;
 				while(et.rest != null){
@@ -133,24 +130,25 @@ static class Stepper implements IStepper{
 		}
 }
 
-static class MultiStepper implements IStepper{
+static class Stepper extends AStepper {
+	Iterator iter;
+	Stepper(IFn xform, Iterator iter){
+		this.iter = iter;
+		this.xform = (IFn) xform.invoke(stepfn);
+		}
+
+	boolean hasNext(){
+		return iter.hasNext();
+		}
+
+	Object next(){
+		return iter.next();
+	}
+}
+
+static class MultiStepper extends AStepper {
 	Iterator[] iters;
 	Object[] nexts;
-	IFn xform;
-	static IFn stepfn = new AFn(){
-		public Object invoke(Object result){
-			LazyTransformer lt = (LazyTransformer)result;
-			lt.stepper = null;
-			return lt;
-			}
-		public Object invoke(Object result, Object input){
-			LazyTransformer lt = (LazyTransformer)result;
-			lt.first = input;
-			lt.rest = new LazyTransformer(lt.stepper);
-			lt.stepper = null;
-			return lt.rest;
-			}
-		};
 
 	MultiStepper(IFn xform, Iterator[] iters){
 		this.iters = iters;
@@ -170,24 +168,6 @@ static class MultiStepper implements IStepper{
 			nexts[i] = iters[i].next();
 		return new ArraySeq(nexts,0);
 	}
-
-	public void step(LazyTransformer lt){
-		while(lt.stepper != null && hasNext()){
-			if(RT.isReduced(xform.applyTo(RT.cons(lt, next()))))
-				{
-				lt.stepper = null;
-				LazyTransformer et = lt;
-				while(et.rest != null){
-					et = et.rest;
-					et.stepper = null;
-					}
-				xform.invoke(et);
-				return;
-				}
-			}
-		if(lt.stepper != null)
-			xform.invoke(lt);
-		}
 }
 
 public ISeq cons(Object o){
