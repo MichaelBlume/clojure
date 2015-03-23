@@ -17,22 +17,33 @@ public class Cycle extends ASeq implements IReduce {
 private final ISeq all;      // never null
 private final ISeq current;  // never null
 private volatile ISeq _next;  // cached
+private final Cycle _head;
 
-private Cycle(ISeq all, ISeq current){
+private Cycle(ISeq all, ISeq current, Cycle head){
     this.all = all;
     this.current = current;
+    this._head = head;
 }
 
-private Cycle(IPersistentMap meta, ISeq all, ISeq current){
+private Cycle(IPersistentMap meta, ISeq all, ISeq current, Cycle head){
     super(meta);
     this.all = all;
     this.current = current;
+    this._head = head;
 }
 
 public static ISeq create(ISeq vals){
     if(vals == null)
         return PersistentList.EMPTY;
-    return new Cycle(vals, vals);
+    return new Cycle(vals, vals, null);
+}
+
+private Cycle head() {
+    if (_head != null)
+        return _head;
+    if (current == all)
+        return this;
+    return null;
 }
 
 public Object first(){
@@ -42,16 +53,17 @@ public Object first(){
 public ISeq next(){
     if(_next == null) {
         ISeq next = current.next();
+        Cycle head = head();
         if (next != null)
-            _next = new Cycle(all, next);
+            _next = new Cycle(all, next, head);
         else
-            _next = new Cycle(all, all);
+            _next = head == null ? new Cycle(all, all, null) : head;
     }
     return _next;
 }
 
 public Cycle withMeta(IPersistentMap meta){
-    return new Cycle(meta, all, current);
+    return new Cycle(meta, all, current, null);
 }
 
 public Object reduce(IFn f){
