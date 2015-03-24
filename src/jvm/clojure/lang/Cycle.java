@@ -18,24 +18,27 @@ private final ISeq all;      // never null
 private final ISeq current;  // never null
 private volatile ISeq _next;  // cached
 private final Cycle _head;
+private final int n;
 
-private Cycle(ISeq all, ISeq current, Cycle head){
+private Cycle(ISeq all, ISeq current, Cycle head, int n){
     this.all = all;
     this.current = current;
     this._head = head;
+    this.n = n;
 }
 
-private Cycle(IPersistentMap meta, ISeq all, ISeq current, Cycle head){
+private Cycle(IPersistentMap meta, ISeq all, ISeq current, Cycle head, int n){
     super(meta);
     this.all = all;
     this.current = current;
     this._head = head;
+    this.n = n;
 }
 
 public static ISeq create(ISeq vals){
     if(vals == null)
         return PersistentList.EMPTY;
-    return new Cycle(vals, vals, null);
+    return new Cycle(vals, vals, null, 0);
 }
 
 private Cycle head() {
@@ -55,40 +58,43 @@ public ISeq next(){
         ISeq next = current.next();
         Cycle head = head();
         if (next != null)
-            _next = new Cycle(all, next, head);
+            _next = new Cycle(all, next, head, n + 1);
         else
-            _next = head == null ? new Cycle(all, all, null) : head;
+            _next = head == null ? new Cycle(all, all, null, 0) : head;
     }
     return _next;
 }
 
 public Cycle withMeta(IPersistentMap meta){
-    return new Cycle(meta, all, current, null);
+    return new Cycle(meta, all, current, null, n);
 }
 
 public Object reduce(IFn f){
-    Object ret = current.first();
+    Object[] xs = RT.seqToArray(all);
+    int len = xs.length;
+    int n = this.n;
+    Object ret = xs[n];
     ISeq s = current;
     while(true) {
-        s = s.next();
-        if(s == null)
-            s = all;
-        ret = f.invoke(ret, s.first());
+        n++;
+        n %= len;
+        ret = f.invoke(ret, xs[n]);
         if(RT.isReduced(ret))
             return ((IDeref)ret).deref();
     }
 }
 
 public Object reduce(IFn f, Object start){
+    Object[] xs = RT.seqToArray(all);
+    int len = xs.length;
     Object ret = start;
-    ISeq s = current;
+    int n = this.n;
     while(true){
-        ret = f.invoke(ret, s.first());
+        ret = f.invoke(ret, xs[n]);
         if(RT.isReduced(ret))
             return ((IDeref)ret).deref();
-        s = s.next();
-        if(s == null)
-            s = all;
+        n++;
+        n %= len;
     }
 }
 }
